@@ -1,0 +1,17 @@
+# Resources
+
+* [Recognizing Traffic signs - Towards DS](https://towardsdatascience.com/recognizing-traffic-signs-with-over-98-accuracy-using-deep-learning-86737aedc2ab)
+* [Car Detection - deeplearning.ai (my homework)](https://drive.google.com/open?id=1kslfVrmdIVNcUsjsdlwf3FMqXCrIW2ia)
+* [Recommendations for laptop and external hard drive: beginning Kaggle competitions | Kaggle](https://www.kaggle.com/getting-started/32990)
+* [Laboratory for Intelligent and Safe Automobiles (LISA) - CVRR - UCSD](http://cvrr.ucsd.edu/LISA/datasets.html)
+* [Traffic Light Detection | LISA](http://cvrr.ucsd.edu/vivachallenge/index.php/traffic-light/traffic-light-detection/)
+* [Sign Detection | LISA](http://cvrr.ucsd.edu/vivachallenge/index.php/signs/sign-detection/)
+* [Traffic Lights Recognition (TLR) public benchmarks [La Route Automatisée]](http://www.lara.prd.fr/benchmarks/trafficlightsrecognition)
+* [Bosch Small Traffic Lights Dataset | Heidelberg Collaboratory for Image Processing (HCI)](https://hci.iwr.uni-heidelberg.de/node/6132)
+* [alex-lechner/Traffic-Light-Classification](https://github.com/alex-lechner/Traffic-Light-Classification)
+* [Traffic Lights Detection and Classification · level5-engineers](https://github.com/level5-engineers/system-integration/wiki/Traffic-Lights-Detection-and-Classification)
+* [Traffic Light Mapping and Detection](https://static.googleusercontent.com/media/research.google.com/ru//pubs/archive/37259.pdf)
+* [tensorflow..models/research/object_detection](https://github.com/tensorflow/models/tree/master/research/object_detection)
+* [The KITTI Vision Benchmark Suite](http://www.cvlibs.net/datasets/kitti/raw_data.php)
+* [Building a Real-Time Object Recognition App with Tensorflow and OpenCV](https://towardsdatascience.com/building-a-real-time-object-recognition-app-with-tensorflow-and-opencv-b7a2b4ebdc32)
+* [Vision | AIY](https://aiyprojects.withgoogle.com/vision/#makers-guide)
