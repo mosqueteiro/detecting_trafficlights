@@ -6,12 +6,16 @@ Date:   03/15/19
 Pipeline for filtering and downloading dataset from cocodataset.org
 '''
 
+from psycopg2 import connect, sql
+from datetime import datetime
 from pycocotools.coco import COCO
 import numpy as np
 import pandas as pd
 import skimage.io as io
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle as rect
+
+from tqdm import tqdm
 
 ''' Data pipeline class '''
 class DataPipeline(object):
@@ -50,14 +54,61 @@ def show_image(coco, imgId, catIds=[], local=False, bbox=False):
 
     fig.show()
 
+def load_sql(data_dir, dataset, dbname, user='postgres', host='/tmp'):
+    '''
+    Parameters =====================================================
+        data_dir (str)      : path to data directory
+        dataset (str)       : specific dataset to load
+        dbname (str)        : name of database to connect with
+        user (str)          : user name for database (default: "postgres")
+    '''
+    conn = psycopg2.connect(dbname=dbname, user=user, host=host)
+    curs = conn.cursor()
+    json_path = '{}/annotations/instances_{}.json'.format(data_dir, dataset)
+    coco = COCO(json_path)
+
+    def insert_into_table(table_name, dict_lst, pages=100):
+        fields = [field for field in dict_lst[0]]
+        query = sql.SQL('''
+        INSERT INTO {} ({})
+        VALUES ({})
+        ON CONFLICT (id)
+        DO UPDATE
+            SET {}
+        ''').format(
+            sql.Identifier(table_name),
+            sql.SQL(',').join(map(sql.Identifier, fields)),
+            sql.SQL(',').join(map(sql.Placeholder, fields)),
+            sql.SQL(',').join([
+                sql.SQL('{0}=EXCLUDED.{0}').format(s)
+                for s in map(sql.Identifier, fields)
+            ])
+        )
+
+        execute_batch(curs, query, dict_lst, page_size=pages)
+
+    imgs = coco.getImgIds()
+    images = coco.loadImgs(imgs)
+    insert_into_table('images', images, 1000)
+    conn.commit()
+
+    categories = coco.loadCats(coco.getCatIds())
+    insert_into_table('categories', categories)
+    conn.commit()
+    
+    annotations = coco.loadAnns(coco.getAnnIds())
+    insert_into_table('annotations', annotations)
+    conn.commit()
+
 
 if __name__ == "__main__":
     data_dir = './data/coco'
     dataset = 'train2017'
-    anno_file = '{}/annotations/instances_{}.json'.format(data_dir, dataset)
+    # anno_file = '{}/annotations/instances_{}.json'.format(data_dir, dataset)
+    #
+    # coco=COCO(anno_file)
+    #
+    # categs = pd.DataFrame([cat for cat in coco.cats.values()])
 
-    coco=COCO(anno_file)
-
-    categs = pd.DataFrame([cat for cat in coco.cats.values()])
-
-    
+    load_sql(data_dir, dataset, coco_trainval2017,
+             'mosqueteiro', 'var/run/postgresql')
