@@ -1,9 +1,12 @@
--- PostgreSQL build SQL database from COCO dataset and annotations
---
+
+-- Title: coco_dataset.sql
 -- Author: Nathan James
 -- Date: 03/18/19
 --
--- Builds the tables for a coco dataset database
+-- PostgreSQL build SQL database from COCO dataset and annotations
+-- ### Prior steps ###
+-- First create the database with $ sudo -u postgres -c "createdb <name>"
+-- Then $ psql <name> < coco_dataset.sql
 
 
 BEGIN;
@@ -41,6 +44,7 @@ CREATE TABLE license (
   url TEXT
 );
 
+-- ### No license function in pycocotools yet ###
 -- ALTER TABLE ONLY images
 --   ADD CONSTRAINT image_license_fkey
 --   FOREIGN KEY (license_id) REFERENCES license(id);
