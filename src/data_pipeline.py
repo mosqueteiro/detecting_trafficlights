@@ -184,41 +184,10 @@ class QueryDatabase(DataPipeline):
         return list(self.df_query.local_path)
 
     def check_location(self, image_name):
-        path = '{}data/coco/{}/{}'.format(self.data_dir, dataset, image_name)
+        path = '{}data/coco/{}/{}'.format(self.data_dir, self.dataset, image_name)
         return os.path.exists(path)
 
 ''' Functions '''
-
-def show_image(coco, imgId, catIds=[], local=False, bbox=False):
-    '''
-    Parameters ===============================================
-        coco (obj)          : COCO object from pycocotools
-        imgId (int)         : image ID
-        catIds (int, list)  : category ID(s) to pull annotations from
-        local (bool)        : is image stored locally
-        bbox (bool)         : show bboxes for category annotations
-    '''
-    img = coco.loadImgs(ids=imgId)[0]
-    if local:
-        img = io.imread(img['local_dir'])
-    else:
-        img = io.imread(img['coco_url'])
-    fig, ax = plt.subplots()
-    ax.imshow(img)
-    ax.axis('off')
-    if bbox:
-        bx_prop = {'fill': False,
-                   'edgecolor': 'red',
-                   'linewidth': 1.25}
-        annotes = coco.getAnnIds(imgId, catIds=catIds)
-        annotes = coco.loadAnns(annotes)
-        boxes = [ann['bbox'] for ann in annotes]
-        patches = [rect((x,y),w,h, **bx_prop) for x,y,w,h in boxes]
-        for patch in patches:
-            ax.add_patch(patch)
-
-    fig.show()
-
 def load_sql(data_dir, dataset, dbname, user='postgres', host='/tmp'):
     '''
     Parameters =====================================================
@@ -289,14 +258,6 @@ if __name__ == "__main__":
     store_dir = '/media/mosqueteiro/TOSHIBA EXT/detecting_trafficlights/'
     user = 'mosqueteiro'
     host = '/var/run/postgresql'
-
-    # categs = pd.DataFrame([cat for cat in coco.cats.values()])
-
-    # load_sql(data_dir, dataset, 'coco_trainval2017',
-    #          'mosqueteiro', '/var/run/postgresql')
-    # buildTrain2017 = BuildDatabase(
-    #     dataset=dataset, user='mosqueteiro', host='/var/run/postgresql'
-    # )
 
     query = '''
 SELECT id as image_id, file_name, coco_url, local_path
