@@ -12,46 +12,45 @@
 BEGIN;
 
 CREATE TABLE categories (
-  id INTEGER PRIMARY KEY,
+  id INTEGER,
   name TEXT,
   supercategory TEXT
 );
 
 CREATE TABLE images (
-  id INTEGER PRIMARY KEY,
-  filename TEXT NOT NULL,
+  id INTEGER,
+  file_name TEXT NOT NULL,
   coco_url TEXT NOT NULL,
   flickr_url TEXT NOT NULL,
   local_path TEXT,
   height INTEGER,
   width INTEGER,
   date_captured TIMESTAMP(0),
-  license_id INTEGER
+  license INTEGER
 );
 
 CREATE TABLE annotations (
-  id INTEGER PRIMARY KEY,
-  image_id INTEGER REFERENCES images(id),
-  category_id INTEGER REFERENCES categories(id),
-  bbox TEXT,
+  id BIGINT,
+  image_id INTEGER,
+  category_id INTEGER,
+  bbox FLOAT[],
   area FLOAT,
-  segmentation TEXT
+  segmentation TEXT,
+  iscrowd INT
 );
 
 CREATE TABLE license (
-  id INTEGER PRIMARY KEY,
+  id INTEGER,
   name TEXT,
   url TEXT
 );
 
--- ### No license function in pycocotools yet ###
--- ALTER TABLE ONLY images
---   ADD CONSTRAINT image_license_fkey
---   FOREIGN KEY (license_id) REFERENCES license(id);
 
 COMMIT;
 
-ANALYZE categories;
-ANALYZE images;
-ANALYZE annotations;
-ANALYZE license;
+
+-- clear out database for testing purposes
+-- DROP SCHEMA public CASCADE;
+-- CREATE SCHEMA public;
+-- GRANT ALL ON SCHEMA public TO postgres;
+-- GRANT ALL ON SCHEMA public TO public;
