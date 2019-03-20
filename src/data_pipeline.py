@@ -28,11 +28,15 @@ class DataPipeline(object):
         dbname = db_prefix + dataset
         self.connect_sql(dbname=dbname, user=user, host=host)
 
+    def __del__(self):
+        self.cursor.close()
+        # print('Cursor closed.')
+        self.connxn.close()
+        # print('Connection closed.')
     def __enter__(self):
         return self
     def __exit__(self, exc_type, exc_value, traceback):
-        self.cursor.close()
-        self.connxn.close()
+        self.__del__()
 
     def connect_sql(self, dbname, user='postgres', host='/tmp'):
         print('Connecting to PostgreSQL server....')
@@ -116,6 +120,14 @@ class QueryDatabase(DataPipeline):
         self.cursor = self.connxn.cursor(cursor_factory=RealDictCursor)
         self.df_query = None
 
+        assert data_dir is not None, \
+            'No data directory was specified.\n' + \
+            'Please specify the directory where images are stored.'
+
+        assert os.path.exists(data_dir), \
+            'This directory does not exist.\n' + \
+            'Please check the path and try again.'
+
     def query_database(self, query=None):
         if query is None:
             query = input('Type out query:\n# ')
@@ -124,16 +136,17 @@ class QueryDatabase(DataPipeline):
 
         self.cursor.execute(query)
         self.df_query = pd.DataFrame(self.cursor.fetchall())
+        self.query = query
 
     def download(self, image_id, image_name, image_url):
         img_data = requests.get(image_url).content
-        path = '{}data/coco/{}/'.format(self.data_dir, dataset)
+        path = '{}data/coco/{}/'.format(self.data_dir, self.dataset)
         if not os.path.exists(path):
             os.makedirs(path)
         path += image_name
         with open(path, 'wb') as file:
             file.write(img_data)
-        self.update('images', image_id, 'local_path', path)
+        self.update_sql('images', image_id, 'local_path', path)
 
     def update_sql(self, table, id, field, value):
         query = sql.SQL('''
@@ -144,25 +157,31 @@ class QueryDatabase(DataPipeline):
                 sql.Literal(value),
                 sql.Literal(id)
              )
+        self.cursor.execute(query)
+        self.connxn.commit()
 
     def get_images(self):
         field_req = ['image_id', 'file_name', 'local_path']
         url_req = ['coco_url', 'flickr_url']
-        if not all(col in self.df_query.columns for col in field_req):
-            print('Data frame must include {}.'.format(', ',join(field_req)))
-            return 0
-        if 'coco_url' in self.df_query.columns:
-            url = 'coco_url'
-        elif 'flickr_url' in self.df_query.columns:
-            url = 'flickr_url'
-        else:
-            print('Data frame must include at least {} or {}'.format(*url_req))
-            return 0
+        assert all(col in self.df_query.columns for col in field_req), \
+            'Data frame must include {}.'.format(', '.join(field_req))
 
-        for image in tqdm(self.df_query.loc[self.df_query.local_path.isna()]):
+        assert any(col in self.df_query.columns for col in url_req), \
+            'Data frame must include at least {} or {}'.format(*url_req)
 
 
-        if not 'image_id' in self.df_query.columns
+        print('Checking images...')
+        for i,image in tqdm(self.df_query.iterrows()):
+            if image['local_path'] is None:
+                print('Image not yet downloaded. Downloading a copy.')
+                self.download(*image[['image_id', 'file_name', 'coco_url']])
+            elif not self.check_location(image['file_name']):
+                print("Couldn't find file. Downloading a copy.")
+                self.download(*image[['image_id', 'file_name', 'coco_url']])
+
+        self.query_database(self.query)
+
+        return list(self.df_query.local_path)
 
     def check_location(self, image_name):
         path = '{}data/coco/{}/{}'.format(self.data_dir, dataset, image_name)
@@ -267,7 +286,7 @@ def insert_into_table(curs, table_name, dict_lst, pages=100):
 if __name__ == "__main__":
     coco_dir = '../data/coco'
     dataset = 'train2017'
-    store_dir = '/media/mosqueteiro/TOSHIBA\ EXT/detecting_trafficlights/'
+    store_dir = '/media/mosqueteiro/TOSHIBA EXT/detecting_trafficlights/'
     user = 'mosqueteiro'
     host = '/var/run/postgresql'
 
@@ -279,6 +298,19 @@ if __name__ == "__main__":
     #     dataset=dataset, user='mosqueteiro', host='/var/run/postgresql'
     # )
 
-    queryTrain2017 = QueryDatabase(
+    query = '''
+SELECT id as image_id, file_name, coco_url, local_path
+FROM images
+WHERE id IN (309022, 5802, 118113, 483108, 60623)
+LIMIT 5;
+    '''
+
+    with QueryDatabase(
         dataset=dataset, user=user, host=host, data_dir=store_dir
-    )
+    ) as train2017:
+        train2017.query_database(query)
+        print(train2017.df_query)
+        # train2017.df_query.drop([3,4], axis=0, inplace=True)
+        images = train2017.get_images()
+        print(images)
+        print(train2017.df_query)

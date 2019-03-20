@@ -10,9 +10,9 @@ ALTER TABLE categories
 
 ALTER TABLE images
   ADD CONSTRAINT images_pkey PRIMARY KEY (id);
-ALTER TABLE images
-  ADD CONSTRAINT image_license_fkey
-  FOREIGN KEY (license) REFERENCES license(id);
+-- ALTER TABLE images
+--   ADD CONSTRAINT image_license_fkey
+--   FOREIGN KEY (license) REFERENCES license(id);
 
 
 ALTER TABLE annotations
