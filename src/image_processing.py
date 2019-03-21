@@ -75,7 +75,7 @@ LIMIT 5;
     # r_sz_op = {'anti_aliasing': True, 'mode':'constant',
     #            'gridspec_kw':{'width_ratios':[[3,]]}}
 
-    fig, axes = plt.subplots(2,5, figsize=(8,15))
+    fig, axes = plt.subplots(2,5, figsize=(10,10))
     for ax,img in zip([axs for sub in axes for axs in sub], imgs+imgs_g):
         imshow(img, ax=ax)
     fig.show()
@@ -85,7 +85,7 @@ LIMIT 5;
         for img in imgs
     ]
     imgs_sm_g = [rgb2gray(img) for img in imgs_sm]
-    fig, axes = plt.subplots(2,5, figsize=(8,15))
+    fig, axes = plt.subplots(2,5, figsize=(10,10))
     for ax,img in zip([axs for sub in axes for axs in sub], imgs_sm+imgs_sm_g):
         imshow(img, ax=ax)
     fig.show()
