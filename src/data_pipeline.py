@@ -120,7 +120,7 @@ class QueryDatabase(DataPipeline):
         self.cursor = self.connxn.cursor(cursor_factory=RealDictCursor)
         self.df_query = None
 
-        assert data_dir is not None, \
+        assert data_dir, \
             'No data directory was specified.\n' + \
             'Please specify the directory where images are stored.'
 
@@ -129,7 +129,7 @@ class QueryDatabase(DataPipeline):
             'Please check the path and try again.'
 
     def query_database(self, query=None):
-        if query is None:
+        if not query:
             query = input('Type out query:\n# ')
             while ';' not in query:
                 query += ' ' + input('# ')
@@ -172,7 +172,7 @@ class QueryDatabase(DataPipeline):
 
         print('Checking images...')
         for i,image in tqdm(self.df_query.iterrows()):
-            if image['local_path'] is None:
+            if not image['local_path']:
                 print('Image not yet downloaded. Downloading a copy.')
                 self.download(*image[['image_id', 'file_name', 'coco_url']])
             elif not self.check_location(image['file_name']):
