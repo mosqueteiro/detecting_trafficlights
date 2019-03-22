@@ -88,6 +88,8 @@ The current model used is modeled after [AlexNet](https://papers.nips.cc/paper/4
 
 
 ## Results
-
+The first model has begun to train. The size had to be reduced to fit on the GPU memory. Cross validation will be used to tune the model hyperparameters.
 
 ## Future Work
+Train, train, trian train...
+Look at other model architectures, ResNet, Inception models.

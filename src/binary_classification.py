@@ -4,7 +4,7 @@ import pandas as pd
 np.random.seed(1337)  # for reproducibility
 
 import tensorflow as tf
-from keras.models import Sequential, Model
+from keras.models import Sequential, Model, load_model
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D, BatchNormalization
 from keras.layers.convolutional import Conv2D
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     tensorBoard = TensorBoard(log_dir='../tb_log', histogram_freq=2,
                               batch_size=batch_size, write_graph=True,
                               write_grads=False, write_images=True)
-    modelCheckpoint = ModelCheckpoint('../models/model_epoch{epoch:02d}.hdf5',
+    modelCheckpoint = ModelCheckpoint('../models/binary_epoch{epoch:02d}.hdf5',
                                       verbose=1, period=1)
 
     '''Data Generators'''
@@ -111,6 +111,7 @@ if __name__ == "__main__":
 
     '''Model creation and training'''
     model = rgb_AlexNet(target_size)
+    # model = load_model('../models/binary_epoch1_half_size.hdf5')
     model.fit_generator(
         train_generator,
         steps_per_epoch=ceil(len(df) / batch_size),
@@ -118,7 +119,8 @@ if __name__ == "__main__":
         verbose=1,
         validation_data=test_generator,
         validation_steps=ceil(len(df)*0.1 / batch_size),
-        callbacks=[modelCheckpoint]
+        callbacks=[modelCheckpoint],
+        initial_epoch=1
     )
 
     score = model.evaluate_generator(test_generator,
