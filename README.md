@@ -84,7 +84,7 @@ Within this database there are ~27,000 street-context images of which ~4,000 con
 ![small_gray](images/small_gray.png)
 
 ## Modeling Methodology
-
+The current model used is modeled after [AlexNet](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf) an 8-layer convolutional neural network. The first (5) layers are convolutional layers that learn filters to apply to the image to make sense of what is in an image. The last (3) layers are fully-connected layers that take the filtered, simplified images and try to learn what makes up a traffic light. AlexNet was originally run in parallel on two GTX 580 graphics cards with 3GB of memory each.
 
 
 ## Results
