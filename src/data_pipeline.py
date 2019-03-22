@@ -22,9 +22,10 @@ from tqdm import tqdm
 
 ''' Data pipeline class '''
 class DataPipeline(object):
-    def __init__(self, dataset, user, host, db_prefix='coco_', data_dir=None):
+    def __init__(self, dataset, user, host, db_prefix='coco_'):
         self.dataset = dataset
-        self.data_dir = data_dir
+
+
         dbname = db_prefix + dataset
         self.connect_sql(dbname=dbname, user=user, host=host)
 
@@ -46,10 +47,8 @@ class DataPipeline(object):
 
 
 class BuildDatabase(DataPipeline):
-    def __init__(
-        self, dataset, user, host, db_prefix='coco_', data_dir=None
-    ):
-        super().__init__(dataset, user, host, db_prefix, data_dir)
+    def __init__(self, dataset, user, host, db_prefix='coco_'):
+        super().__init__(dataset, user, host, db_prefix)
         self.coco = None
         self.tables = None
 
@@ -57,7 +56,7 @@ class BuildDatabase(DataPipeline):
         print('Building Database...')
 
         print('Setting up SQL tables')
-        self.create_tables()
+        self.create_tables('coco_dataset.sql')
 
         self.load_json(coco_dir)
 
@@ -84,11 +83,11 @@ class BuildDatabase(DataPipeline):
             annotation['segmentation'] = str(annotation['segmentation'])
 
 
-    def create_tables(self, file='coco_dataset.sql'):
+    def create_tables(self, file):
         print('Running {}...'.format(file))
         with open(file,'r') as f:
             query = f.read()
-        if self.connxn is None:
+        if not self.connxn:
             print('Connection to database must first be established.')
             return 0
         print('Executing SQL...')
@@ -115,7 +114,8 @@ class BuildDatabase(DataPipeline):
 
 class QueryDatabase(DataPipeline):
     def __init__(self, dataset, user, host, db_prefix='coco_', data_dir=None):
-        super().__init__(dataset, user, host, db_prefix, data_dir)
+        super().__init__(dataset, user, host, db_prefix)
+        self.data_dir = data_dir
         self.cursor.close()
         self.cursor = self.connxn.cursor(cursor_factory=RealDictCursor)
         self.df_query = None
@@ -196,61 +196,9 @@ def load_sql(data_dir, dataset, dbname, user='postgres', host='/tmp'):
         dbname (str)        : name of database to connect with
         user (str)          : user name for database (default: "postgres")
     '''
-    print('Connecting to PostgreSQL server....', end='')
-    conn = connect(dbname=dbname, user=user, host=host)
-    print('Connected')
-    curs = conn.cursor()
+    pass
 
-    print('Loading COCO dataset {} information:'.format(dataset))
-    json_path = '{}/annotations/instances_{}.json'.format(data_dir, dataset)
-    coco = COCO(json_path)
 
-    print('Loading image table into SQL.......', end='')
-    imgs = coco.getImgIds()
-    images = coco.loadImgs(imgs)
-    insert_into_table(curs, 'images', images, 1000)
-    conn.commit()
-    print('Done', end='\n\n')
-
-    print('Loading categories table into SQL......', end='')
-    categories = coco.loadCats(coco.getCatIds())
-    insert_into_table(curs, 'categories', categories)
-    conn.commit()
-    print('Done', end='\n\n')
-
-    print('Loading annotations table in SQL......', end='')
-    annotations = coco.loadAnns(coco.getAnnIds())
-    for annotation in tqdm(annotations):
-        annotation['bbox'] = str(annotation['bbox'])
-        annotation['segmentation'] = str(annotation['segmentation'])
-    insert_into_table(curs, 'annotations', annotations)
-    conn.commit()
-    print('Done', end='\n\n')
-
-    print('Closing cursor.')
-    curs.close()
-    print('Closing connection.')
-    conn.close()
-    print('exit')
-
-def insert_into_table(curs, table_name, dict_lst, pages=100):
-    fields = [field for field in dict_lst[0]]
-    query = sql.SQL('''
-    INSERT INTO {} ({})
-    VALUES ({})
-    ON CONFLICT (id)
-    DO UPDATE
-        SET {}
-    ''').format(
-        sql.Identifier(table_name),
-        sql.SQL(',').join(map(sql.Identifier, fields)),
-        sql.SQL(',').join(map(sql.Placeholder, fields)),
-        sql.SQL(',').join([
-            sql.SQL('{0}=EXCLUDED.{0}').format(s)
-            for s in map(sql.Identifier, fields)
-        ])
-    )
-    execute_batch(curs, query, dict_lst, page_size=pages)
 
 if __name__ == "__main__":
     coco_dir = '../data/coco'
