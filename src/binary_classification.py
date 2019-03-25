@@ -1,6 +1,7 @@
 from math import ceil
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 np.random.seed(1337)  # for reproducibility
 
 import tensorflow as tf
@@ -19,10 +20,11 @@ from trafficlight_data import load_binary_train
 
 def rgb_AlexNet(input_shape):
     model = Sequential()
-    model.add(Conv2D(96, 7, strides=2, input_shape=(*input_shape, 3)))
+    model.add(Conv2D(48, 7, strides=2, input_shape=(*input_shape, 3)))
     model.add(Activation('relu'))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(2))
+    # model.add(Dropout(0.5))
     # 100x100 -> 28x28
 
     model.add(Conv2D(128, 5, strides=1, padding='same'))
@@ -34,12 +36,6 @@ def rgb_AlexNet(input_shape):
     model.add(Conv2D(192, 3, strides=2))
     model.add(Activation('relu'))
     # 19x19 -> 9x9
-
-    model.add(Conv2D(192, 3, strides=1, padding='same'))
-    model.add(Activation('relu'))
-
-    model.add(Conv2D(128, 3, strides=1, padding='same'))
-    model.add(Activation('relu'))
     model.add(BatchNormalization())
 
     model.add(Flatten())
@@ -55,6 +51,43 @@ def rgb_AlexNet(input_shape):
 
     return model
 
+def train_model(model, train_gen, test_gen, steps, val_steps, **kwargs):
+    '''
+    '''
+    kw = {
+        'epochs':5,
+        'initial_epoch': 0,
+        'callbacks': []
+    }
+    kw.update(kwargs)
+
+    history = model.fit_generator(
+        train_gen,
+        steps_per_epoch=steps,
+        epochs=kw['epochs'],
+        verbose=1,
+        validation_data=test_gen,
+        validation_steps=val_steps,
+        callbacks=kw['callbacks'],
+        initial_epoch=kw['initial_epoch']
+    )
+    return history
+
+def plot_acc(history, fig=None):
+    metrics = {'acc':[], 'val_acc':[]}
+    for hist in history:
+        for k,v in hist.history.items():
+            metrics[k] = metrics.get(k, []) + v
+    if isinstance(fig, type(plt.figure())):
+        ax = fig.axes[0]
+    else:
+        fig, ax = plt.subplots(figsize=(10,8))
+    ax.plot(metrics['acc'], label='train')
+    ax.plot(metrics['val_acc'], label='test')
+    ax.set_xlabel('Epochs')
+    ax.set_ylabel('Accuracy')
+    ax.set_title('Accuracy per Epoch')
+    fig.show()
 
 
 if __name__ == "__main__":
@@ -70,24 +103,30 @@ if __name__ == "__main__":
     df = X.join(y_label)
     undersample = np.random.choice(df[~mask_tl].index, size=5000, replace=False)
     df_sample = df.loc[mask_tl].append(df.loc[undersample])
-    # X_train, X_test, y_train, y_test = train_test_split(X_sample, y_sample,
-                                                        # test_size=0.10)
+
     '''Train parameters'''
-    batch_size = 20
+    batch_size = 50
+    val_split = 0.10
+    steps = ceil(len(df_sample)*(1-val_split) / batch_size)
+    val_steps = ceil(len(df_sample)*val_split / batch_size)
     target_size = (100,100)
+    epochs = 10
+    initial_epoch = 0
 
     # add callbacks
     tensorBoard = TensorBoard(log_dir='../tb_log', histogram_freq=2,
                               batch_size=batch_size, write_graph=True,
                               write_grads=False, write_images=True)
-    modelCheckpoint = ModelCheckpoint('../models/binary_epoch{epoch:02d}.hdf5',
-                                      verbose=1, period=1)
+    modelCheckpoint = ModelCheckpoint(
+        '../models/binary_epoch{epoch:02d}.hdf5',
+        verbose=1, period=1
+    )
 
     '''Data Generators'''
     df_datagen = ImageDataGenerator(shear_range=0.2,
                                        zoom_range=0.2,
                                        horizontal_flip=True,
-                                       validation_split=0.10)
+                                       validation_split=val_split)
     train_generator = df_datagen.flow_from_dataframe(
                         df_sample,
                         x_col='local_path',
@@ -112,18 +151,20 @@ if __name__ == "__main__":
     '''Model creation and training'''
     model = rgb_AlexNet(target_size)
     # model = load_model('../models/binary_epoch1_half_size.hdf5')
-    model.fit_generator(
-        train_generator,
-        steps_per_epoch=ceil(len(df) / batch_size),
-        epochs=10,
-        verbose=1,
-        validation_data=test_generator,
-        validation_steps=ceil(len(df)*0.1 / batch_size),
-        callbacks=[modelCheckpoint],
-        initial_epoch=1
-    )
+    # history = model.fit_generator(
+    #     train_generator,
+    #     steps_per_epoch=ceil(len(df) / batch_size),
+    #     epochs=epochs,
+    #     verbose=1,
+    #     validation_data=test_generator,
+    #     validation_steps=ceil(len(df)*0.1 / batch_size),
+    #     # callbacks=[modelCheckpoint],
+    #     initial_epoch=initial_epoch
+    # )
+    history = train_model(model, train_generator, test_generator, steps,
+                val_steps=val_steps, epochs=epochs, initial_epoch=initial_epoch)
 
     score = model.evaluate_generator(test_generator,
                                     len(test_generator),
                                     verbose=0)
-    print('Test score: {}\tTest accuracy: {}'.format(*score))
+    print('Test score: {:.3f}\tTest accuracy: {:.3f}'.format(*score))

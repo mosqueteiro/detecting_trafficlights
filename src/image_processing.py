@@ -11,24 +11,20 @@ class ImageProcessor(object):
 
 
 ''' Functions '''
-def show_image(coco, imgId, catIds=[], local=False, bbox=False):
+def show_images(images, resz_shape=None, bbox=None):
     '''
     Parameters ===============================================
-        coco (obj)          : COCO object from pycocotools
-        imgId (int)         : image ID
+        images (list)       : list of paths to images to display
         catIds (int, list)  : category ID(s) to pull annotations from
-        local (bool)        : is image stored locally
-        bbox (bool)         : show bboxes for category annotations
+        bbox (list)        : list of bbox annotations for each picture
     '''
-    img = coco.loadImgs(ids=imgId)[0]
-    if local:
-        img = imread(img['local_dir'])
-    else:
-        img = imread(img['coco_url'])
-    fig, ax = plt.subplots()
-    ax.imshow(img)
-    ax.axis('off')
-    if bbox:
+    imgs = [imread(img) for img in images]
+
+    if resz_shape:
+        imgs = [resize(img, resz_shape, anti_aliasing=True, mode='constant')
+                for img in imgs]
+
+    if bbox: # needs to be refactored
         bx_prop = {'fill': False,
                    'edgecolor': 'red',
                    'linewidth': 1.25}
@@ -39,53 +35,46 @@ def show_image(coco, imgId, catIds=[], local=False, bbox=False):
         for patch in patches:
             ax.add_patch(patch)
 
+    fig = imshow_collection(imgs)
     fig.show()
 
 
 if __name__ == "__main__":
-    from data_pipeline import QueryDatabase
+    from trafficlight_data import load_binary_train
 
-    coco_dir = '../data/coco'
-    dataset = 'train2017'
-    store_dir = '/media/mosqueteiro/TOSHIBA EXT/detecting_trafficlights/'
-    user = 'mosqueteiro'
-    host = '/var/run/postgresql'
+    X, y = load_binary_train()
+    images = X['local_path']
 
-    query = '''
-SELECT id as image_id, file_name, coco_url, local_path
-FROM images
-WHERE id IN (309022, 5802, 118113, 483108, 60623)
-LIMIT 5;
-    '''
+    mask = y == 1
 
-    images = []
-    with QueryDatabase(
-        dataset=dataset, user=user, host=host, data_dir=store_dir
-    ) as train2017:
-        train2017.query_database(query)
+    n = 6
+    imgs_1 = np.random.choice(images[mask], size=6, replace=False)
+    imgs_0 = np.random.choice(images[~mask], size=6, replace=False)
 
-        images = train2017.get_images()
+    show_images(imgs_1)
+    show_images(imgs_0)
 
-    imgs = [imread(img) for img in images]
-    # fig = imshow_collection(imgs, 'matplotlib')
+
+    # imgs = [imread(img) for img in images]
+    # # fig = imshow_collection(imgs, 'matplotlib')
+    # # fig.show()
+    # imgs_g = [rgb2gray(img) for img in imgs]
+    # # fig = imshow_collection(imgs_g)
+    # # fig.show()
+    # # r_sz_op = {'anti_aliasing': True, 'mode':'constant',
+    # #            'gridspec_kw':{'width_ratios':[[3,]]}}
+    #
+    # fig, axes = plt.subplots(2,5, figsize=(10,10))
+    # for ax,img in zip([axs for sub in axes for axs in sub], imgs+imgs_g):
+    #     imshow(img, ax=ax)
     # fig.show()
-    imgs_g = [rgb2gray(img) for img in imgs]
-    # fig = imshow_collection(imgs_g)
+    #
+    # imgs_sm = [
+    #     resize(img,(100,100,3), anti_aliasing=True, mode='constant')
+    #     for img in imgs
+    # ]
+    # imgs_sm_g = [rgb2gray(img) for img in imgs_sm]
+    # fig, axes = plt.subplots(2,5, figsize=(10,10))
+    # for ax,img in zip([axs for sub in axes for axs in sub], imgs_sm+imgs_sm_g):
+    #     imshow(img, ax=ax)
     # fig.show()
-    # r_sz_op = {'anti_aliasing': True, 'mode':'constant',
-    #            'gridspec_kw':{'width_ratios':[[3,]]}}
-
-    fig, axes = plt.subplots(2,5, figsize=(10,10))
-    for ax,img in zip([axs for sub in axes for axs in sub], imgs+imgs_g):
-        imshow(img, ax=ax)
-    fig.show()
-
-    imgs_sm = [
-        resize(img,(100,100,3), anti_aliasing=True, mode='constant')
-        for img in imgs
-    ]
-    imgs_sm_g = [rgb2gray(img) for img in imgs_sm]
-    fig, axes = plt.subplots(2,5, figsize=(10,10))
-    for ax,img in zip([axs for sub in axes for axs in sub], imgs_sm+imgs_sm_g):
-        imshow(img, ax=ax)
-    fig.show()
