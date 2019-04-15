@@ -21,7 +21,7 @@ from tqdm import tqdm
 
 ''' Data pipeline class '''
 class DataPipeline(object):
-    def __init__(self, dataset, user, host, db_prefix='coco_'):
+    def __init__(self, dataset, user, host, port='5432', db_prefix='coco_'):
         self.dataset = dataset
 
 
@@ -38,9 +38,9 @@ class DataPipeline(object):
     def __exit__(self, exc_type, exc_value, traceback):
         self.__del__()
 
-    def connect_sql(self, dbname, user='postgres', host='/tmp'):
+    def connect_sql(self, dbname, user='postgres', host='/tmp', port='5432'):
         print('Connecting to PostgreSQL server....')
-        self.connxn = connect(dbname=dbname, user=user, host=host)
+        self.connxn = connect(dbname=dbname, user=user, host=host, port=port)
         print('\tConnected.')
         self.cursor = self.connxn.cursor()
 
@@ -113,12 +113,6 @@ class BuildDatabase(DataPipeline):
 
 class QueryDatabase(DataPipeline):
     def __init__(self, dataset, user, host, db_prefix='coco_', data_dir=None):
-        super().__init__(dataset, user, host, db_prefix)
-        self.data_dir = data_dir
-        self.cursor.close()
-        self.cursor = self.connxn.cursor(cursor_factory=RealDictCursor)
-        self.df_query = None
-
         assert data_dir, \
             'No data directory was specified.\n' + \
             'Please specify the directory where images are stored.'
@@ -126,6 +120,13 @@ class QueryDatabase(DataPipeline):
         assert os.path.exists(data_dir), \
             'This directory does not exist.\n' + \
             'Please check the path and try again.'
+
+        super().__init__(dataset, user, host, db_prefix)
+        self.data_dir = data_dir
+        self.cursor.close()
+        self.cursor = self.connxn.cursor(cursor_factory=RealDictCursor)
+        self.df_query = None
+        self.path = '{}data/coco/{}/'.format(self.data_dir, self.dataset)
 
     def query_database(self, query=None):
         if not query:
@@ -139,7 +140,8 @@ class QueryDatabase(DataPipeline):
 
     def download(self, image_id, image_name, image_url):
         img_data = requests.get(image_url).content
-        path = '{}data/coco/{}/'.format(self.data_dir, self.dataset)
+        # path = '{}data/coco/{}/'.format(self.data_dir, self.dataset)
+        path = self.path
         if not os.path.exists(path):
             os.makedirs(path)
         path += image_name
@@ -172,6 +174,10 @@ class QueryDatabase(DataPipeline):
         print('Checking images...')
         for i,image in tqdm(self.df_query.iterrows()):
             if not image['local_path']:
+                if self.check_location(image['file_name']):
+                    path = self.path + image['image_name']
+                    self.update_sql('images', image.image_id, 'local_path', path)
+                    continue
                 print('Image not yet downloaded. Downloading a copy.')
                 self.download(*image[['image_id', 'file_name', 'coco_url']])
             elif not self.check_location(image['file_name']):

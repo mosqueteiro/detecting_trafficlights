@@ -29,6 +29,16 @@ CREATE TABLE images (
   license INTEGER
 );
 
+CREATE TABLE processed_images (
+  id INTEGER,
+  image_id INTEGER,
+  vector BYTEA,
+  height INTEGER,
+  width INTEGER,
+  date_proessed TIMESTAMP(0),
+  notes TEXT
+);
+
 CREATE TABLE annotations (
   id BIGINT,
   image_id INTEGER,
