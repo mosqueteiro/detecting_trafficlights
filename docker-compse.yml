@@ -1,0 +1,12 @@
+version: '3'
+services:
+  jupyter_flow:
+    build: docker/jupyter_lab
+    ports:
+      - '8888:8888'
+    # volumes:
+    #   -
+
+  pg_serv:
+    image: postgres
+    ports: '5432:5432'

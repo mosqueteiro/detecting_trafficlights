@@ -1,5 +1,6 @@
 .zip
 .json
+data/
 src/__pycache__/
 tb_log/
 models/
