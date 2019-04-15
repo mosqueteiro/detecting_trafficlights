@@ -1,4 +1,5 @@
-data/
+.zip
+.json
 src/__pycache__/
 tb_log/
 models/
