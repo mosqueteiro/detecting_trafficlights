@@ -1,5 +1,18 @@
 
 
+## Initial Setup
+The first thing to do in an aws instance is to clone the repo:  
+```bash
+git clone https://github.com/mosqueteiro/detecting_trafficlights.git
+cd detecting_trafficlights
+```
+
+Then the aws_setup.sh script:
+```bash
+sudo chmod +x aws_setup.sh
+bash aws_setup.sh
+```
+
 ## PostgreSQL
 ### Starting the postgres server in a container
 

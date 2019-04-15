@@ -4,8 +4,8 @@ services:
     build: docker/jupyter_lab
     ports:
       - '8888:8888'
-    # volumes:
-    #   -
+    volumes:
+      - .:/home/jovyan
 
   pg_serv:
     image: postgres
