@@ -14,6 +14,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 docker-compose up -d
+docker exec detecting_trafficlights_jupyter_flow_1 jupyter notebook list
 
 # download train2017 images
 sudo apt install unzip

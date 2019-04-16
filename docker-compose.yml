@@ -1,8 +1,8 @@
 version: '3'
 services:
   jupyter_flow:
-    image: tensorflow/tensorflow:latest-py3-jupyter
-    # build: docker/jupyter
+    # image: tensorflow/tensorflow:latest-py3-jupyter
+    build: docker/jupyter
     ports:
       - '8888:8888'
     volumes:
