@@ -23,5 +23,5 @@ pip install -r docker/jupyter/requirements.txt \
 # sudo apt install unzip
 # mkdir -p data/coco/train2017
 # curl -O http://images.cocodataset.org/zips/train2017.zip
-# unzip train2017.zip -d data/coco/train2017/
+# unzip train2017.zip -d data/coco/
 # rm train2017.zip
