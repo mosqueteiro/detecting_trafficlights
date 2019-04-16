@@ -14,11 +14,13 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 docker-compose up -d
+docker exec detecting_trafficlights_jupyter_flow_1 \
+pip install -r docker/jupyter/requirements.txt
 docker exec detecting_trafficlights_jupyter_flow_1 jupyter notebook list
 
 # download train2017 images
-sudo apt install unzip
-mkdir -p data/coco/train2017
-curl -O http://images.cocodataset.org/zips/train2017.zip
-unzip train2017.zip -d data/coco/train2017/
-rm train2017.zip
+# sudo apt install unzip
+# mkdir -p data/coco/train2017
+# curl -O http://images.cocodataset.org/zips/train2017.zip
+# unzip train2017.zip -d data/coco/train2017/
+# rm train2017.zip
