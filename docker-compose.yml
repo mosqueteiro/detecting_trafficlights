@@ -1,8 +1,9 @@
-version: '3'
+version: '2.3'
 services:
   jupyter_flow:
-    image: tensorflow/tensorflow:1.12-gpu-py3-jupyter
+    image: tensorflow/tensorflow:latest-gpu-py3-jupyter
     # build: docker/jupyter
+    runtime: nvidia
     ports:
       - '8888:8888'
     volumes:
