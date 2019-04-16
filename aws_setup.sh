@@ -3,7 +3,6 @@
 sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-cd detecting_trafficlights
 # docker-compose up -d
 # docker exec detecting_trafficlights_jupyter_flow_1 \
 # pip install -r docker/jupyter/requirements.txt
