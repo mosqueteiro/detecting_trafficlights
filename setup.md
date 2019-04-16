@@ -3,7 +3,7 @@
 ## Initial Setup
 The first thing to do in an aws instance is to clone the repo:  
 ```bash
-git clone https://github.com/mosqueteiro/detecting_trafficlights.git
+git clone https://github.com/mosqueteiro/detecting_trafficlights.git && \
 cd detecting_trafficlights
 ```
 
