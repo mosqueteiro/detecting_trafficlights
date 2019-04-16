@@ -6,9 +6,13 @@ services:
     ports:
       - '8888:8888'
     volumes:
-      - .:/home/jovyan
+      - .:/tf
 
   pg_serv:
     image: postgres
     ports:
       - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data
