@@ -1,6 +1,7 @@
 .zip
 .json
-data/
+data/coco/train2017
+data/coco/annotations/*.json
 src/__pycache__/
 tb_log/
 models/

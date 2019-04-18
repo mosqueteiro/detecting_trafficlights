@@ -43,9 +43,10 @@ CREATE TABLE annotations (
   id BIGINT,
   image_id INTEGER,
   category_id INTEGER,
-  bbox FLOAT[],
+  bbox BYTEA,
   area FLOAT,
-  segmentation TEXT,
+  segmentation BYTEA,
+  seg_dims BYTEA,
   iscrowd INT
 );
 

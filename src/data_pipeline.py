@@ -21,7 +21,7 @@ from tqdm import tqdm
 
 ''' Data pipeline class '''
 class DataPipeline(object):
-    def __init__(self, dataset, user, host, port='5432', db_prefix='coco_'):
+    def __init__(self, dataset, user, host, port='5432', db_prefix=''):
         self.dataset = dataset
 
 
@@ -46,7 +46,7 @@ class DataPipeline(object):
 
 
 class BuildDatabase(DataPipeline):
-    def __init__(self, dataset, user, host, db_prefix='coco_'):
+    def __init__(self, dataset, user, host, db_prefix=''):
         super().__init__(dataset, user, host, db_prefix)
         self.coco = None
         self.tables = None
