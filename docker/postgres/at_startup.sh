@@ -1,7 +1,7 @@
 #!/bin/bash
 
-createdb train2017
+createdb -U postgres train2017
 psql train2017 < initdb.sql
 
-createdb val2017
+createdb -U postgres val2017
 psql val2017 < initdb.sql
