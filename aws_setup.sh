@@ -8,6 +8,12 @@ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 # pip install -r docker/jupyter/requirements.txt
 # docker exec detecting_trafficlights_jupyter_flow_1 jupyter notebook list
 bash start_services.sh
+docker exec detecting_trafficlights_jupyter_flow_1 \
+sudo apt install -y libpq-dev
+# docker exec detecting_trafficlights_jupyter_flow_1 \
+# sudo apt install -y postgresql-devel.x86_64
+docker exec detecting_trafficlights_jupyter_flow_1 \
+pip install -r docker/jupyter/requirements.txt
 
 # download train2017 images
 # sudo apt install unzip

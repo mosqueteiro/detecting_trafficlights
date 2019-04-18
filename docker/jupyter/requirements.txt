@@ -1,4 +1,5 @@
 pandas
 scikit-learn
 scikit-image
+psycopg2
 keras
