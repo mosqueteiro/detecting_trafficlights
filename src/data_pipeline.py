@@ -21,12 +21,15 @@ from tqdm import tqdm
 
 ''' Data pipeline class '''
 class DataPipeline(object):
-    def __init__(self, dataset, user, host, port='5432', db_prefix=''):
+    def __init__(self, dataset, user, host, port='5432', data_dir=None):
         self.dataset = dataset
-
-
-        dbname = db_prefix + dataset
-        self.connect_sql(dbname=dbname, user=user, host=host)
+        self.data_dir = data_dir
+        if data_dir:
+            assert os.path.exists(data_dir), \
+                'This directory does not exist.\n' + \
+                'Please check the path and try again.'
+            self.data_dir = f'{data_dir}coco/{self.dataset}/'
+        self.connect_sql(dbname=dataset, user=user, host=host)
 
     def __del__(self):
         self.cursor.close()
@@ -44,18 +47,24 @@ class DataPipeline(object):
         print('\tConnected.')
         self.cursor = self.connxn.cursor()
 
+    def check_location(self, image_name):
+        path = f'{self.data_dir}{image_name}'
+        return os.path.exists(path)
+
 
 class BuildDatabase(DataPipeline):
-    def __init__(self, dataset, user, host, db_prefix=''):
-        super().__init__(dataset, user, host, db_prefix)
+    def __init__(self, dataset, user, host, data_dir=None):
+        super().__init__(dataset, user, host)
         self.coco = None
         self.tables = None
+        self.data_dir = data_dir
+
 
     def build_sql(self, coco_dir):
         print('Building Database...')
 
-        print('Setting up SQL tables')
-        self.create_tables('coco_dataset.sql')
+        # print('Setting up SQL tables')
+        # self.create_tables('coco_dataset.sql')
 
         self.load_json(coco_dir)
 
@@ -63,8 +72,8 @@ class BuildDatabase(DataPipeline):
             self.insert_into_table(table, entries, pages=1000)
 
 
-        print('Adding relational constraints')
-        self.create_tables('sql_constraints.sql')
+        # print('Adding relational constraints')
+        # self.create_tables('sql_constraints.sql')
 
         print('Finished building database.')
 
@@ -79,7 +88,17 @@ class BuildDatabase(DataPipeline):
             'annotations': self.coco.loadAnns(self.coco.getAnnIds())
         }
         for annotation in self.tables['annotations']:
-            annotation['segmentation'] = str(annotation['segmentation'])
+            annotation['seg_dims'] = np.array(
+                [len(seg) for seg in annotation['segmentation']]
+            ).tostring()
+            annotation['segmentation'] = np.array(
+                [pt for pts in annotation['segmentation'] for pt in pts]
+            )
+            annotation['bbox'] = np.array(annotation['bbox']).tostring()
+        if self.data_dir:
+            for img in self.tables['images']:
+                if self.check_location(img['file_name']):
+                    img['local_path'] = f'{self.data_dir}{image_name}'
 
 
     def create_tables(self, file):
@@ -112,7 +131,7 @@ class BuildDatabase(DataPipeline):
         print('\tCommited.')
 
 class QueryDatabase(DataPipeline):
-    def __init__(self, dataset, user, host, db_prefix='coco_', data_dir=None):
+    def __init__(self, dataset, user, host, data_dir=None):
         assert data_dir, \
             'No data directory was specified.\n' + \
             'Please specify the directory where images are stored.'
@@ -188,9 +207,12 @@ class QueryDatabase(DataPipeline):
 
         return list(self.df_query.local_path)
 
-    def check_location(self, image_name):
-        path = '{}data/coco/{}/{}'.format(self.data_dir, self.dataset, image_name)
-        return os.path.exists(path)
+    def bytestr_to_list(
+        self, bytestr, dims=b'\x04\x00\x00\x00\x00\x00\x00\x00', dtype=float
+    ):
+        it = iter(np.frombuffer(bytestr, dtype=dtype))
+        return [[next(it) for _ in range(shape)]
+                 for shape in np.frombuffer(dims, dtype=int)]
 
 ''' Functions '''
 def load_sql(data_dir, dataset, dbname, user='postgres', host='/tmp'):
@@ -212,19 +234,22 @@ if __name__ == "__main__":
     user = 'mosqueteiro'
     host = '/var/run/postgresql'
 
-    query = '''
-SELECT id as image_id, file_name, coco_url, local_path
-FROM images
-WHERE id IN (309022, 5802, 118113, 483108, 60623)
-LIMIT 5;
-    '''
+    with BuildDatabase(
+        dataset='val2016', user='postgres', host='pg_serv')
 
-    with QueryDatabase(
-        dataset=dataset, user=user, host=host, data_dir=store_dir
-    ) as train2017:
-        train2017.query_database(query)
-        print(train2017.df_query)
-        # train2017.df_query.drop([3,4], axis=0, inplace=True)
-        images = train2017.get_images()
-        print(images)
-        print(train2017.df_query)
+#     query = '''
+# SELECT id as image_id, file_name, coco_url, local_path
+# FROM images
+# WHERE id IN (309022, 5802, 118113, 483108, 60623)
+# LIMIT 5;
+#     '''
+#
+#     with QueryDatabase(
+#         dataset=dataset, user=user, host=host, data_dir=store_dir
+#     ) as train2017:
+#         train2017.query_database(query)
+#         print(train2017.df_query)
+#         # train2017.df_query.drop([3,4], axis=0, inplace=True)
+#         images = train2017.get_images()
+#         print(images)
+#         print(train2017.df_query)
