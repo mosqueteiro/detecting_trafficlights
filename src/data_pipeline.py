@@ -28,7 +28,7 @@ class DataPipeline(object):
             assert os.path.exists(data_dir), \
                 'This directory does not exist.\n' + \
                 'Please check the path and try again.'
-            self.data_dir = f'{data_dir}coco/{self.dataset}/'
+            self.data_dir = '{}coco/{}/'.format(data_dir, self.dataset)
         self.connect_sql(dbname=dataset, user=user, host=host)
 
     def __del__(self):
@@ -48,7 +48,7 @@ class DataPipeline(object):
         self.cursor = self.connxn.cursor()
 
     def check_location(self, image_name):
-        path = f'{self.data_dir}{image_name}'
+        path = '{}{}'.format(data_dir, image_name)
         return os.path.exists(path)
 
 
@@ -98,7 +98,7 @@ class BuildDatabase(DataPipeline):
         if self.data_dir:
             for img in self.tables['images']:
                 if self.check_location(img['file_name']):
-                    img['local_path'] = f'{self.data_dir}{image_name}'
+                    img['local_path'] = '{}{}'.format(data_dir, image_name)
 
 
     def create_tables(self, file):
