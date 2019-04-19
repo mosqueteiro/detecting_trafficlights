@@ -16,7 +16,6 @@ from matplotlib.patches import Rectangle as rect
 import requests
 import os
 
-from tqdm import tqdm
 
 ''' Data pipeline class '''
 class DataPipeline(object):
@@ -183,7 +182,7 @@ class QueryDatabase(DataPipeline):
 
 
         print('Checking images...')
-        for i,image in tqdm(self.df_query.iterrows()):
+        for i,image in self.df_query.iterrows():
             if not image['local_path']:
                 if self.check_location(image['file_name']):
                     path = self.data_dir + image['image_name']
