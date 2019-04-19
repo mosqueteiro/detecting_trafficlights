@@ -225,7 +225,7 @@ if __name__ == "__main__":
     host = 'pg_serv'
 
     with BuildDatabase(
-        dataset='val2016', user=user, host=host, data_dir=coco_dir
+        dataset='val2017', user=user, host=host, data_dir=coco_dir
     ) as buildDB:
         buildDB.build_sql(buildDB.data_dir)
 
