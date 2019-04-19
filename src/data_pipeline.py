@@ -79,11 +79,13 @@ class BuildDatabase(DataPipeline):
     def load_json(self, coco_dir):
         print('Loading COCO dataset {} information....'.format(self.dataset))
         path = '{}/annotations/instances_{}.json'.format(coco_dir, self.dataset)
-        self.coco = COCO(path)
+        with open(path, 'r') as file:
+            self.coco = json.load(file)
         self.tables = {
-            'categories': self.coco.loadCats(self.coco.getCatIds()),
-            'images': self.coco.loadImgs(self.coco.getImgIds()),
-            'annotations': self.coco.loadAnns(self.coco.getAnnIds())
+            'categories': self.coco['categories'],
+            'images': self.coco['images'],
+            'annotations': self.coco['annotations'],
+            'license' : self.coco['licenses']
         }
         for annotation in self.tables['annotations']:
             annotation['seg_dims'] = np.array(
