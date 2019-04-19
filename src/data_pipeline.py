@@ -54,11 +54,9 @@ class DataPipeline(object):
 
 class BuildDatabase(DataPipeline):
     def __init__(self, dataset, user, host, data_dir=None):
-        super().__init__(dataset, user, host)
+        super().__init__(dataset, user, host, data_dir)
         self.coco = None
         self.tables = None
-        self.data_dir = data_dir
-
 
     def build_sql(self, coco_dir):
         print('Building Database...')
@@ -135,17 +133,10 @@ class QueryDatabase(DataPipeline):
         assert data_dir, \
             'No data directory was specified.\n' + \
             'Please specify the directory where images are stored.'
-
-        assert os.path.exists(data_dir), \
-            'This directory does not exist.\n' + \
-            'Please check the path and try again.'
-
-        super().__init__(dataset, user, host, db_prefix)
-        self.data_dir = data_dir
+        super().__init__(dataset, user, host, db_prefix, data_dir)
         self.cursor.close()
         self.cursor = self.connxn.cursor(cursor_factory=RealDictCursor)
         self.df_query = None
-        self.path = '{}data/coco/{}/'.format(self.data_dir, self.dataset)
 
     def query_database(self, query=None):
         if not query:
@@ -160,7 +151,7 @@ class QueryDatabase(DataPipeline):
     def download(self, image_id, image_name, image_url):
         img_data = requests.get(image_url).content
         # path = '{}data/coco/{}/'.format(self.data_dir, self.dataset)
-        path = self.path
+        path = self.data_dir
         if not os.path.exists(path):
             os.makedirs(path)
         path += image_name
@@ -194,7 +185,7 @@ class QueryDatabase(DataPipeline):
         for i,image in tqdm(self.df_query.iterrows()):
             if not image['local_path']:
                 if self.check_location(image['file_name']):
-                    path = self.path + image['image_name']
+                    path = self.data_dir + image['image_name']
                     self.update_sql('images', image.image_id, 'local_path', path)
                     continue
                 print('Image not yet downloaded. Downloading a copy.')
@@ -228,14 +219,15 @@ def load_sql(data_dir, dataset, dbname, user='postgres', host='/tmp'):
 
 
 if __name__ == "__main__":
-    coco_dir = '../data/coco'
+    coco_dir = '../data/'
     dataset = 'train2017'
-    store_dir = '/media/mosqueteiro/TOSHIBA EXT/detecting_trafficlights/'
-    user = 'mosqueteiro'
-    host = '/var/run/postgresql'
+    user = 'postgres'
+    host = 'pg_serv'
 
     with BuildDatabase(
-        dataset='val2016', user='postgres', host='pg_serv')
+        dataset='val2016', user=user, host=host, data_dir=coco_dir
+    ) as buildDB:
+        buildDB.build_sql(buildDB.data_dir)
 
 #     query = '''
 # SELECT id as image_id, file_name, coco_url, local_path
