@@ -9,7 +9,6 @@ Pipeline for filtering and downloading dataset from cocodataset.org
 from psycopg2 import connect, sql
 from psycopg2.extras import execute_batch, RealDictCursor
 from datetime import datetime
-from pycocotools.coco import COCO
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
