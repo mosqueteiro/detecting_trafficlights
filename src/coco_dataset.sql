@@ -43,13 +43,13 @@ CREATE TABLE annotations (
   id BIGINT,
   image_id INTEGER,
   category_id INTEGER,
-  bbox FLOAT[],
+  bbox BYTEA,
   area FLOAT,
   segmentation TEXT,
   iscrowd INT
 );
 
-CREATE TABLE license (
+CREATE TABLE licenses (
   id INTEGER,
   name TEXT,
   url TEXT

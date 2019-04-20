@@ -45,12 +45,11 @@ CREATE TABLE annotations (
   category_id INTEGER,
   bbox BYTEA,
   area FLOAT,
-  segmentation BYTEA,
-  seg_dims BYTEA,
+  segmentation TEXT,
   iscrowd INT
 );
 
-CREATE TABLE license (
+CREATE TABLE licenses (
   id INTEGER,
   name TEXT,
   url TEXT

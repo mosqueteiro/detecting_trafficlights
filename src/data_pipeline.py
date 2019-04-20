@@ -6,28 +6,41 @@ Date:   03/15/19
 Pipeline for filtering and downloading dataset from cocodataset.org
 '''
 
+import psycopg2 as pg2
 from psycopg2 import connect, sql
 from psycopg2.extras import execute_batch, RealDictCursor
 from datetime import datetime
+import json
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle as rect
 import requests
 import os
+from io import StringIO, BytesIO
 
 
 ''' Data pipeline class '''
 class DataPipeline(object):
-    def __init__(self, dataset, user, host, port='5432', data_dir=None):
+    def __init__(self, dataset, host, user='postgres', port='5432', data_dir=None):
+        '''
+    Description: Base class for connecting to SQL server
+    Parameters =====================================================
+        dataset (str)      : name of dataset
+        host (str)         : PostgreSQL host (container name for docker)
+        user (str)         : postgres user, default: postsgres
+        port (str)         : port the SQL server has open
+        data_dir (str)     : path to directory containing all the data, this
+                             should have a '/' at the end of it
+        '''
         self.dataset = dataset
         self.data_dir = data_dir
         if data_dir:
             assert os.path.exists(data_dir), \
                 'This directory does not exist.\n' + \
                 'Please check the path and try again.'
-            self.data_dir = '{}coco/{}/'.format(data_dir, self.dataset)
-        self.connect_sql(dbname=dataset, user=user, host=host)
+            self.data_dir = '{}{}/'.format(data_dir, self.dataset)
+        self.connect_sql(dbname=dataset, user=user, host=host, port=port)
 
     def __del__(self):
         self.cursor.close()
@@ -46,17 +59,27 @@ class DataPipeline(object):
         self.cursor = self.connxn.cursor()
 
     def check_location(self, image_name):
-        path = '{}{}'.format(data_dir, image_name)
+        path = '{}{}'.format(self.data_dir, image_name)
         return os.path.exists(path)
 
 
 class BuildDatabase(DataPipeline):
-    def __init__(self, dataset, user, host, data_dir=None):
-        super().__init__(dataset, user, host, data_dir)
-        self.coco = None
+    def __init__(self, dataset, host, user='postgres', port='5432', data_dir=None):
+        '''
+    Description: class for building a SQL database from a coco annotations
+            instances_*.json
+    Parameters =====================================================
+        dataset (str)      : name of dataset
+        host (str)         : PostgreSQL host (container name for docker)
+        user (str)         : postgres user, default: postsgres
+        port (str)         : port the SQL server has open
+        data_dir (str)     : path to directory containing all the data, this
+                             should have a '/' at the end of it
+        '''
+        super().__init__(dataset, host=host, user=user, data_dir=data_dir)
         self.tables = None
 
-    def build_sql(self, coco_dir):
+    def build_sql(self, coco_dir=None):
         print('Building Database...')
 
         # print('Setting up SQL tables')
@@ -65,7 +88,7 @@ class BuildDatabase(DataPipeline):
         self.load_json(coco_dir)
 
         for table,entries in self.tables.items():
-            self.insert_into_table(table, entries, pages=1000)
+            self.copy_into_table(table, entries)
 
 
         # print('Adding relational constraints')
@@ -73,31 +96,30 @@ class BuildDatabase(DataPipeline):
 
         print('Finished building database.')
 
-
-    def load_json(self, coco_dir):
+    def load_json(self, coco_dir=None):
         print('Loading COCO dataset {} information....'.format(self.dataset))
-        path = '{}/annotations/instances_{}.json'.format(coco_dir, self.dataset)
+        if not coco_dir:
+            path = '{}/annotations/instances_{}.json'.format(self.data_dir,
+                                                             self.dataset)
+        else:
+            path = coco_dir
+        assert os.path.exists(path), 'File does not exists at this location.'
         with open(path, 'r') as file:
-            self.coco = json.load(file)
-        self.tables = {
-            'categories': self.coco['categories'],
-            'images': self.coco['images'],
-            'annotations': self.coco['annotations'],
-            'license' : self.coco['licenses']
-        }
-        for annotation in self.tables['annotations']:
-            annotation['seg_dims'] = np.array(
-                [len(seg) for seg in annotation['segmentation']]
-            ).tostring()
-            annotation['segmentation'] = np.array(
-                [pt for pts in annotation['segmentation'] for pt in pts]
-            )
-            annotation['bbox'] = np.array(annotation['bbox']).tostring()
+            self.tables = json.load(file)
+        self.info = self.tables.pop('info')
+        for table in self.tables:
+            self.tables[table] = pd.DataFrame(self.tables[table]).set_index('id')
+        annotations = self.tables['annotations']
+        annotations.bbox = annotations.bbox.apply(
+                lambda x: np.array(x, dtype=float)
+        )
+        annotations.segmentation = annotations.segmentation.apply(json.dumps)
         if self.data_dir:
-            for img in self.tables['images']:
-                if self.check_location(img['file_name']):
-                    img['local_path'] = '{}{}'.format(data_dir, image_name)
-
+            images = self.tables['images']
+            located = images.file_name.apply(self.check_location)
+            images['local_path'] = images.loc[located, 'file_name'].apply(
+                        lambda x: data_dir + x
+            )
 
     def create_tables(self, file):
         print('Running {}...'.format(file))
@@ -112,28 +134,38 @@ class BuildDatabase(DataPipeline):
         self.connxn.commit()
         print('\tCommited.')
 
-    def insert_into_table(self, table_name, dict_lst, pages=100):
+    def copy_into_table(self, table_name, df):
         print('Loading {} into database...'.format(table_name))
-        fields = [field for field in dict_lst[0]]
-        query = sql.SQL('''
-        INSERT INTO {} ({})
-        VALUES ({})
-        ''').format(
-                sql.Identifier(table_name),
-                sql.SQL(',').join(map(sql.Identifier, fields)),
-                sql.SQL(',').join(map(sql.Placeholder, fields)),
+        # buffer = StringIO()
+        with StringIO() as buffer:
+            df.to_csv(buffer, sep='\t')
+            buffer.seek(0)
+            fields = buffer.readline().strip('\n').split()
+            self.cursor.copy_from(
+                buffer, table_name, sep='\t', null='', columns=fields
             )
-        execute_batch(self.cursor, query, dict_lst, page_size=pages)
-        print('\t{} Done.'.format(table_name))
+        print('\t{} COPIED.'.format(table_name))
         self.connxn.commit()
-        print('\tCommited.')
+        print('\tCOMMITED.')
+
 
 class QueryDatabase(DataPipeline):
-    def __init__(self, dataset, user, host, data_dir=None):
+    def __init__(self, dataset, host, user='postgres', port='5432', data_dir=None):
+        '''
+    Description: Class for connecting and querying SQL server holding annotation
+            data for a COCO dataset
+    Parameters =====================================================
+        dataset (str)      : name of dataset
+        host (str)         : PostgreSQL host (container name for docker)
+        user (str)         : postgres user, default: postsgres
+        port (str)         : port the SQL server has open
+        data_dir (str)     : path to directory containing all the data, this
+                             should have a '/' at the end of it
+        '''
         assert data_dir, \
             'No data directory was specified.\n' + \
             'Please specify the directory where images are stored.'
-        super().__init__(dataset, user, host, db_prefix, data_dir)
+        super().__init__(dataset, host=host, user=user, data_dir=data_dir)
         self.cursor.close()
         self.cursor = self.connxn.cursor(cursor_factory=RealDictCursor)
         self.df_query = None
@@ -206,17 +238,40 @@ class QueryDatabase(DataPipeline):
                  for shape in np.frombuffer(dims, dtype=int)]
 
 ''' Functions '''
-def load_sql(data_dir, dataset, dbname, user='postgres', host='/tmp'):
+def make_csv(file):
     '''
     Parameters =====================================================
-        data_dir (str)      : path to data directory
-        dataset (str)       : specific dataset to load
-        dbname (str)        : name of database to connect with
-        user (str)          : user name for database (default: "postgres")
+        file (str)      : path to json file containing annotations
     '''
-    pass
+    print('Not currently implemented.'); pass
+    print('Opening file: {}'.format(file))
+    with open(file, 'r') as raw:
+        tables = json.load(raw)
+    print('Creating Tables')
+    for table in tables:
+        df = pd.DataFrame(tables[table])
 
 
+###################################################
+# special code to use PostgreSQL BYTEA and np arrays
+def _adapt_array(arr):
+    out = BytesIO()
+    np.savetxt(out, arr, fmt='%.2f')
+    out.seek(0)
+    return pg2.Binary(out.read())
+
+def _typecast_array(value, cur):
+    if value is None:
+        return None
+    data = pg2.BINARY(value, cur)
+    bdata = BytesIO(data[1:-1])
+    bdata.seek(0)
+    return np.loadtxt(bdata)
+
+    pg2.extensions.register_adapter(np.ndarray, _adapt_array)
+    t_array = pg2.extensions.new_type(pg2.BINARY.values, 'numpy', _typecast_array)
+    pg2.extensions.register_type(t_array)
+###################################################
 
 if __name__ == "__main__":
     coco_dir = '../data/'
