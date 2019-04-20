@@ -103,7 +103,8 @@ class BuildDatabase(DataPipeline):
                                                              self.dataset)
         else:
             path = coco_dir
-        assert os.path.exists(path), 'File does not exists at this location.'
+        assert os.path.exists(path), \
+            'File does not exists at this location.\n{}'.format(path)
         with open(path, 'r') as file:
             self.tables = json.load(file)
         self.info = self.tables.pop('info')
