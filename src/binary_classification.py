@@ -28,7 +28,7 @@ def rgb_AlexNet(input_shape, **kwargs):
         'epsilon':kwargs.get('epsilon', None),
         'decay':kwargs.get('decay', 0.0)
     }
-    
+
 
     model = Sequential()
     model.add(Conv2D(48, 7, strides=2, input_shape=(*input_shape, 3)))
@@ -71,7 +71,7 @@ def train_model(model, train_gen, test_gen, steps, val_steps, **kwargs):
         'callbacks': []
     }
     kw.update(kwargs)
-
+    import pdb; pdb.set_trace()
     history = model.fit_generator(
         train_gen,
         steps_per_epoch=steps,
