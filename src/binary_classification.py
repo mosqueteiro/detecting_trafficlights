@@ -63,7 +63,8 @@ if __name__ == "__main__":
     '''Training parameters'''
     batch_size = 100
     val_split = 0.10
-    target_size = (100,100,3)
+    target_size = (100,100)
+    input_shape = (*target_size, 3) # use 1 for gray
     epochs = 200
     initial_epoch = 0
     seed = 1337
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     df_train, df_test = train_test_split(df_balanced, **ttsplit)
     y_test = df_test.category.to_numpy()
     imgProc = ImageProcessor(df_test.local_path)
-    imgProc.resize_imgs(target_size)
+    imgProc.resize_imgs(input_shape)
     X_test = np.array(imgProc.images.to_list())
 
 
@@ -122,7 +123,7 @@ if __name__ == "__main__":
     hyper = {
         'lr': 0.03,
     }
-    model = like_AlexNet(target_size, **hyper)
+    model = like_AlexNet(input_shape, **hyper)
 
     # add callbacks
     tb_log = '../tb_logs/binary_lAN_{}_lr{}_{}'.format(color,
