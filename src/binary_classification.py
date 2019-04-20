@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 np.random.seed(1337)  # for reproducibility
 
 import tensorflow as tf
+from keras import optimizers
 from keras.models import Sequential, Model, load_model
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D, BatchNormalization
@@ -18,7 +19,17 @@ from sklearn.model_selection import train_test_split
 from trafficlight_data import load_binary_train
 
 
-def rgb_AlexNet(input_shape):
+def rgb_AlexNet(input_shape, **kwargs):
+    # Hyperparameters
+    optim = {
+        'lr':kwargs.get('lr', 0.001),
+        'beta_1':kwargs.get('beta_1', 0.9),
+        'beta_2':kwargs.get('beta_2', 0.999),
+        'epsilon':kwargs.get('epsilon', None),
+        'decay':kwargs.get('decay', 0.0)
+    }
+    
+
     model = Sequential()
     model.add(Conv2D(48, 7, strides=2, input_shape=(*input_shape, 3)))
     model.add(Activation('relu'))
@@ -46,8 +57,8 @@ def rgb_AlexNet(input_shape):
     model.add(Dropout(0.5))
 
     model.add(Dense(1, activation='sigmoid'))
-
-    model.compile('adam', loss='binary_crossentropy', metrics=['acc'])
+    adam = optimizers.Adam(**optim)
+    model.compile(adam, loss='binary_crossentropy', metrics=['acc'])
 
     return model
 
@@ -92,11 +103,16 @@ def plot_acc(history, fig=None):
 
 if __name__ == "__main__":
     # allow gpu memory growth as needed
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth=True
-    sess = tf.Session(config=config)
+    # config = tf.ConfigProto()
+    # config.gpu_options.allow_growth=True
+    # sess = tf.Session(config=config)
     ###################################
-    X, y = load_binary_train()
+    train_args = {'dataset':'train2017',
+		  'host':'pg_serv',
+		  'user':'postgres',
+		  'data_dir':'data/coco/'
+		 }
+    X, y = load_binary_train(**train_args)
     label = ['not_tl','traffic_light']
     y_label = y.apply(lambda i: label[1] if i == 1 else label[0])
     mask_tl = y == 1
@@ -105,12 +121,12 @@ if __name__ == "__main__":
     df_sample = df.loc[mask_tl].append(df.loc[undersample])
 
     '''Train parameters'''
-    batch_size = 50
+    batch_size = 500
     val_split = 0.10
     steps = ceil(len(df_sample)*(1-val_split) / batch_size)
     val_steps = ceil(len(df_sample)*val_split / batch_size)
     target_size = (100,100)
-    epochs = 10
+    epochs = 200
     initial_epoch = 0
 
     # add callbacks
@@ -149,7 +165,7 @@ if __name__ == "__main__":
                         )
 
     '''Model creation and training'''
-    model = rgb_AlexNet(target_size)
+    model = rgb_AlexNet(target_size, lr=0.3, decay=0.01)
     # model = load_model('../models/binary_epoch1_half_size.hdf5')
     # history = model.fit_generator(
     #     train_generator,
