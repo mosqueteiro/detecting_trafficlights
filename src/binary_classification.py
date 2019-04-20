@@ -71,7 +71,6 @@ def train_model(model, train_gen, test_gen, steps, val_steps, **kwargs):
         'callbacks': []
     }
     kw.update(kwargs)
-    import pdb; pdb.set_trace()
     history = model.fit_generator(
         train_gen,
         steps_per_epoch=steps,
@@ -128,6 +127,7 @@ if __name__ == "__main__":
     target_size = (100,100)
     epochs = 200
     initial_epoch = 0
+    import pdb; pdb.set_trace()
 
     # add callbacks
     tensorBoard = TensorBoard(log_dir='../tb_log', histogram_freq=2,
