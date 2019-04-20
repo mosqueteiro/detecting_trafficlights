@@ -120,14 +120,13 @@ if __name__ == "__main__":
     df_sample = df.loc[mask_tl].append(df.loc[undersample])
 
     '''Train parameters'''
-    batch_size = 250
+    batch_size = 100
     val_split = 0.10
     steps = ceil(len(df_sample)*(1-val_split) / batch_size)
     val_steps = ceil(len(df_sample)*val_split / batch_size)
     target_size = (100,100)
     epochs = 200
     initial_epoch = 0
-    import pdb; pdb.set_trace()
 
     # add callbacks
     tensorBoard = TensorBoard(log_dir='../tb_log', histogram_freq=2,
