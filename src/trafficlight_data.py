@@ -11,7 +11,7 @@ def load_binary_train(**kwargs):
     host = kwargs.get('host', 'localhost')
     user = kwargs.get('user', 'postgres')
     data_dir = kwargs.get('data_dir', 'data/coco/')
-    with QueryDatabase(dataset, host, user, data_dir) as data:
+    with QueryDatabase(dataset, host, user, data_dir=data_dir) as data:
         data.query_database('SELECT * FROM street_images')
         X = data.df_query.set_index('image_id').sort_index()
         data.query_database('SELECT * FROM street_annotations')
