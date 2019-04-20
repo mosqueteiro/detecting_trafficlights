@@ -23,7 +23,7 @@ def like_AlexNet(input_shape, **kwargs):
     dropout_rate = kwargs.get('dropout_rate', 0.5)
 
     model = Sequential()
-    model.add(Conv2D(48, 7, strides=2, input_shape=(*input_shape)))
+    model.add(Conv2D(48, 7, strides=2, input_shape=input_shape))
     model.add(Activation(conv_act))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(2))
