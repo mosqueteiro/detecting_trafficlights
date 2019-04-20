@@ -20,7 +20,7 @@ def like_AlexNet(input_shape, **kwargs):
     activation = kwargs.get('activation', 'relu')
     conv_act = kwargs.get('conv_act', activation)
     dense_act = kwargs.get('dense_act', activation)
-    dropout_rate = kwargs.get('dropout_rate': 0.5)
+    dropout_rate = kwargs.get('dropout_rate', 0.5)
 
     model = Sequential()
     model.add(Conv2D(48, 7, strides=2, input_shape=(*input_shape)))
