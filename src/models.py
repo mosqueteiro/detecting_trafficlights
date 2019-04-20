@@ -17,33 +17,36 @@ def like_AlexNet(input_shape, **kwargs):
         'decay':kwargs.get('decay', 0.0)
     }
     # Model structure parameters
-
+    activation = kwargs.get('activation', 'relu')
+    conv_act = kwargs.get('conv_act', activation)
+    dense_act = kwargs.get('dense_act', activation)
+    dropout_rate = kwargs.get('dropout_rate': 0.5)
 
     model = Sequential()
     model.add(Conv2D(48, 7, strides=2, input_shape=(*input_shape)))
-    model.add(Activation('relu'))
+    model.add(Activation(conv_act))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(2))
-    model.add(Dropout(0.5))
+    model.add(Dropout(dropout_rate))
     # 100x100 -> 28x28
 
     model.add(Conv2D(128, 5, strides=1, padding='same'))
-    model.add(Activation('relu'))
+    model.add(Activation(conv_act))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(2))
     # 28x28 -> 19x19
 
     model.add(Conv2D(192, 3, strides=2))
-    model.add(Activation('relu'))
+    model.add(Activation(conv_act))
     # 19x19 -> 9x9
     model.add(BatchNormalization())
 
     model.add(Flatten())
-    model.add(Dense(2048, activation='relu'))
-    model.add(Dropout(0.5))
+    model.add(Dense(2048, activation=dense_act))
+    model.add(Dropout(dropout_rate))
 
-    model.add(Dense(2048, activation='relu'))
-    model.add(Dropout(0.5))
+    model.add(Dense(2048, activation=dense_act))
+    model.add(Dropout(dropout_rate))
 
     model.add(Dense(1, activation='sigmoid'))
     adam = optimizers.Adam(**optim)
