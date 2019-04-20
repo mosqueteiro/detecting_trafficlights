@@ -79,13 +79,13 @@ class BuildDatabase(DataPipeline):
         super().__init__(dataset, host=host, user=user, data_dir=data_dir)
         self.tables = None
 
-    def build_sql(self, coco_dir=None):
+    def build_sql(self):
         print('Building Database...')
 
         # print('Setting up SQL tables')
         # self.create_tables('coco_dataset.sql')
 
-        self.load_json(coco_dir)
+        self.load_json(None)
 
         for table,entries in self.tables.items():
             self.copy_into_table(table, entries)
