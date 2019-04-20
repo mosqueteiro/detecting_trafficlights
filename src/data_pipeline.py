@@ -204,8 +204,8 @@ class QueryDatabase(DataPipeline):
         self.connxn.commit()
 
     def get_images(self):
-        field_req = ['image_id', 'file_name', 'local_path']
-        url_req = ['coco_url', 'flickr_url']
+        field_req = ('image_id', 'file_name', 'local_path')
+        url_req = ('coco_url', 'flickr_url')
         assert all(col in self.df_query.columns for col in field_req), \
             'Data frame must include {}.'.format(', '.join(field_req))
 
@@ -230,12 +230,6 @@ class QueryDatabase(DataPipeline):
 
         return list(self.df_query.local_path)
 
-    def bytestr_to_list(
-        self, bytestr, dims=b'\x04\x00\x00\x00\x00\x00\x00\x00', dtype=float
-    ):
-        it = iter(np.frombuffer(bytestr, dtype=dtype))
-        return [[next(it) for _ in range(shape)]
-                 for shape in np.frombuffer(dims, dtype=int)]
 
 ''' Functions '''
 def make_csv(file):
