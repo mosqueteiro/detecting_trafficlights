@@ -25,7 +25,7 @@ class ImageProcessor(object):
         if not self.loaded:
             self.load_imgs()
         # self.images = (resize(img, **kwargs) for img in self.images)
-        self.images = self.images.apply(lambda img: resize(img, **kwargs))
+        self.images = self.images.apply(lambda img: resize(img, shape, **opts))
 
     def to_gray(self):
         if not self.loaded:
