@@ -86,10 +86,10 @@ if __name__ == "__main__":
     df_balanced = df.loc[mask_tl].append(df.loc[undersample])
     ttsplit = {'test_size':val_split, 'random_state':seed}
     df_train, df_test = train_test_split(df_balanced, **ttsplit)
-    y_test = df_test.category
+    y_test = df_test.category.to_numpy()
     imgProc = ImageProcessor(df_test.local_path)
     imgProc.resize_imgs(target_size)
-    X_test = imgProc.images
+    X_test = np.array(imgProc.images.to_list())
 
 
     '''Data Generators'''
