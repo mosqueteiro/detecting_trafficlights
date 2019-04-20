@@ -90,7 +90,7 @@ if __name__ == "__main__":
     imgProc = ImageProcessor(df_test.local_path)
     imgProc.resize_imgs(target_size)
     X_test = imgProc.images
-    import pdb; pdb.set_trace()
+
 
     '''Data Generators'''
     df_datagen = ImageDataGenerator(shear_range=0.2,
