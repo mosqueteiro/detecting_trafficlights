@@ -6,3 +6,4 @@ data/coco/annotations/*.json
 src/__pycache__/
 tb_log/
 models/
+notebooks/.ipynb_checkpoints
