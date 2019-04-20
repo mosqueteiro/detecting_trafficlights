@@ -109,7 +109,7 @@ if __name__ == "__main__":
     train_args = {'dataset':'train2017',
 		  'host':'pg_serv',
 		  'user':'postgres',
-		  'data_dir':'data/coco/'
+		  'data_dir':'../data/coco/'
 		 }
     X, y = load_binary_train(**train_args)
     label = ['not_tl','traffic_light']
