@@ -82,7 +82,8 @@ if __name__ == "__main__":
     label = ('not_tl','traffic_light')
     y_label = y.apply(lambda i: label[1] if i == 1 else label[0])
     mask_tl = y == 1
-    df = X.join(y_label)
+    # df = X.join(y_label)
+    df = X.join(y)
     undersample = np.random.choice(df[~mask_tl].index, size=5000, replace=False)
     df_balanced = df.loc[mask_tl].append(df.loc[undersample])
     ttsplit = {'test_size':val_split, 'random_state':seed}
