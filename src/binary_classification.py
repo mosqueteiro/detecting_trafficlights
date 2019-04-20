@@ -65,7 +65,7 @@ if __name__ == "__main__":
     val_split = 0.10
     target_size = (100,100)
     input_shape = (*target_size, 3) # use 1 for gray
-    epochs = 200
+    epochs = 50
     initial_epoch = 0
     seed = 1337
     color = 'rgb'
@@ -82,8 +82,8 @@ if __name__ == "__main__":
     label = ('not_tl','traffic_light')
     y_label = y.apply(lambda i: label[1] if i == 1 else label[0])
     mask_tl = y == 1
-    # df = X.join(y_label)
-    df = X.join(y)
+    df = X.join(y_label)
+    # df = X.join(y)
     undersample = np.random.choice(df[~mask_tl].index, size=5000, replace=False)
     df_balanced = df.loc[mask_tl].append(df.loc[undersample])
     ttsplit = {'test_size':val_split, 'random_state':seed}
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     imgProc = ImageProcessor(df_test.local_path)
     imgProc.resize_imgs(input_shape)
     X_test = np.array(imgProc.images.to_list())
-
+    y_test = y[df_test.category].to_numpy()
 
     '''Data Generators'''
     df_datagen = ImageDataGenerator(shear_range=0.2,
