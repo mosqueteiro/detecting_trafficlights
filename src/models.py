@@ -27,7 +27,7 @@ def like_AlexNet(input_shape, **kwargs):
     model.add(Activation(conv_act))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(2))
-    model.add(Dropout(dropout_rate))
+    model.add(Dropout(rate=dropout_rate))
     # 100x100 -> 28x28
 
     model.add(Conv2D(128, 5, strides=1, padding='same'))
@@ -43,10 +43,10 @@ def like_AlexNet(input_shape, **kwargs):
 
     model.add(Flatten())
     model.add(Dense(2048, activation=dense_act))
-    model.add(Dropout(dropout_rate))
+    model.add(Dropout(rate=dropout_rate))
 
     model.add(Dense(2048, activation=dense_act))
-    model.add(Dropout(dropout_rate))
+    model.add(Dropout(rate=dropout_rate))
 
     model.add(Dense(1, activation='sigmoid'))
     adam = optimizers.Adam(**optim)

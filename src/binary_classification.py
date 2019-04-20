@@ -63,7 +63,7 @@ if __name__ == "__main__":
     '''Training parameters'''
     batch_size = 100
     val_split = 0.10
-    target_size = (100,100)
+    target_size = (100,100,3)
     epochs = 200
     initial_epoch = 0
     seed = 1337
@@ -122,9 +122,7 @@ if __name__ == "__main__":
     hyper = {
         'lr': 0.03,
     }
-    _ = {'rgb':3, 'gray':1}
-    input_shape = (*target_size, _.get(color, 3))
-    model = like_AlexNet(input_shape, **hyper)
+    model = like_AlexNet(target_size, **hyper)
 
     # add callbacks
     tb_log = '../tb_logs/binary_lAN_{}_lr{}_{}'.format(color,
