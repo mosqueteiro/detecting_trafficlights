@@ -99,7 +99,7 @@ class BuildDatabase(DataPipeline):
     def load_json(self, coco_dir=None):
         print('Loading COCO dataset {} information....'.format(self.dataset))
         if not coco_dir:
-            path = '{}/annotations/instances_{}.json'.format(self.data_dir,
+            path = '{}annotations/instances_{}.json'.format(self.data_dir,
                                                              self.dataset)
         else:
             path = coco_dir
