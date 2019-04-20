@@ -13,11 +13,12 @@ from keras.preprocessing.image import array_to_img, img_to_array, load_img
 from sklearn.model_selection import train_test_split
 
 from trafficlight_data import load_binary_train
+from image_processing import ImageProcessor
 from models import like_AlexNet
 
 
 
-def traingen_model(model, train_gen, test_gen, steps, val_steps, **kwargs):
+def traingen_model(model, train_gen, test_gen, steps, **kwargs):
     '''
     '''
     kw = {
@@ -31,7 +32,6 @@ def traingen_model(model, train_gen, test_gen, steps, val_steps, **kwargs):
         train_gen,
         steps_per_epoch=steps,
         validation_data=test_gen,
-        validation_steps=val_steps,
         **kw
     )
     return history
@@ -86,6 +86,10 @@ if __name__ == "__main__":
     df_balanced = df.loc[mask_tl].append(df.loc[undersample])
     ttsplit = {'test_size':val_split, 'random_state':seed}
     df_train, df_test = train_test_split(df_balanced, **ttsplit)
+    y_test = df_test.category
+    imgProc = ImageProcessor(df_test.local_path)
+    imgProc.resize_imgs(target_size)
+    X_test = imgProc.images
 
 
     '''Data Generators'''
@@ -107,11 +111,11 @@ if __name__ == "__main__":
                         # subset='training',
                         **gen_ops
                         )
-    test_generator = df_datagen.flow_from_dataframe(
-                        df_test,
-                        # subset='validation',
-                        **gen_ops
-                        )
+    # test_generator = df_datagen.flow_from_dataframe(
+    #                     df_test,
+    #                     # subset='validation',
+    #                     **gen_ops
+    #                     )
 
     '''Model creation and training'''
     # Hyperparameters for model
@@ -140,8 +144,8 @@ if __name__ == "__main__":
     # training
     steps = ceil(len(df_balanced)*(1-val_split) / batch_size)
     val_steps = ceil(len(df_balanced)*val_split / batch_size)
-    history = traingen_model(model, train_generator, test_generator, steps,
-                val_steps=val_steps, epochs=epochs, initial_epoch=initial_epoch,
+    history = traingen_model(model, train_generator, (X_test, y_test), steps,
+                epochs=epochs, initial_epoch=initial_epoch,
                 callbacks=[tensorBoard]
                 )
 

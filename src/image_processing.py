@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from skimage.color import rgb2gray
 from skimage.transform import resize
 from skimage.io import imread, imshow, imshow_collection
@@ -12,7 +13,8 @@ class ImageProcessor(object):
         self.loaded = False
 
     def load_imgs(self):
-        self.images = (imread(img) for img in self.paths)
+        # self.images = (imread(img) for img in self.paths)
+        self.images = self.paths.apply(imread)
         self.loaded = True
 
     def resize_imgs(self, shape, **kwargs):
@@ -21,13 +23,15 @@ class ImageProcessor(object):
             'mode': 'constant',
         }
         if not self.loaded:
-            self.load_imgs
-        self.images = (resize(img, **kwargs) for img in self.images)
+            self.load_imgs()
+        # self.images = (resize(img, **kwargs) for img in self.images)
+        self.images = self.images.apply(lambda img: resize(img, **kwargs))
 
     def to_gray(self):
         if not self.loaded:
             self.load_imgs
-        self.images = (rgb2gray(img) for img in self.images)
+        # self.images = (rgb2gray(img) for img in self.images)
+        self.images = self.images.apply(rgb2gray)
 
 
 ''' Functions '''
