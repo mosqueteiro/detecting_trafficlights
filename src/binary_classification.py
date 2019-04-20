@@ -68,9 +68,6 @@ if __name__ == "__main__":
     initial_epoch = 0
     seed = 1337
     color = 'rgb'
-    steps = ceil(len(df_balanced)*(1-val_split) / batch_size)
-    val_steps = ceil(len(df_balanced)*val_split / batch_size)
-
 
 
     '''Loading and Splitting Images'''
@@ -141,6 +138,8 @@ if __name__ == "__main__":
     )
 
     # training
+    steps = ceil(len(df_balanced)*(1-val_split) / batch_size)
+    val_steps = ceil(len(df_balanced)*val_split / batch_size)
     history = traingen_model(model, train_generator, test_generator, steps,
                 val_steps=val_steps, epochs=epochs, initial_epoch=initial_epoch,
                 callbacks=[tensorBoard]
