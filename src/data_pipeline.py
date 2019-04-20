@@ -118,7 +118,7 @@ class BuildDatabase(DataPipeline):
             images = self.tables['images']
             located = images.file_name.apply(self.check_location)
             images['local_path'] = images.loc[located, 'file_name'].apply(
-                        lambda x: data_dir + x
+                        lambda x: self.data_dir + x
             )
 
     def create_tables(self, file):
