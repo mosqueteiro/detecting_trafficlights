@@ -6,8 +6,28 @@ import matplotlib.pyplot as plt
 
 ''' Classes '''
 class ImageProcessor(object):
-    def __init__(self):
-        pass
+    def __init__(self, img_paths):
+        self.paths = img_paths
+        self.images = None
+        self.loaded = False
+
+    def load_imgs(self):
+        self.images = (imread(img) for img in self.paths)
+        self.loaded = True
+
+    def resize_imgs(self, shape, **kwargs):
+        opts = {
+            'anti_aliasing': True,
+            'mode': 'constant',
+        }
+        if not self.loaded:
+            self.load_imgs
+        self.images = (resize(img, **kwargs) for img in self.images)
+
+    def to_gray(self):
+        if not self.loaded:
+            self.load_imgs
+        self.images = (rgb2gray(img) for img in self.images)
 
 
 ''' Functions '''
