@@ -121,7 +121,7 @@ if __name__ == "__main__":
     df_sample = df.loc[mask_tl].append(df.loc[undersample])
 
     '''Train parameters'''
-    batch_size = 500
+    batch_size = 250
     val_split = 0.10
     steps = ceil(len(df_sample)*(1-val_split) / batch_size)
     val_steps = ceil(len(df_sample)*val_split / batch_size)
