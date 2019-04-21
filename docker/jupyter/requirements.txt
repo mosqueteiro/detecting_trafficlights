@@ -4,3 +4,4 @@ scikit-image
 psycopg2
 keras
 requests
+tensorboard

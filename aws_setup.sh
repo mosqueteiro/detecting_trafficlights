@@ -22,3 +22,7 @@ docker exec detecting_trafficlights_jupyter_flow_1 bash -c \
 docker exec detecting_trafficlights_jupyter_flow_1 \
 pip install -r docker/jupyter/requirements.txt
 docker exec detecting_trafficlights_jupyter_flow_1 jupyter notebook list
+
+# tensorboard setup
+mkdir tb_logs
+docker exec detecting_trafficlights_jupyter_flow_1 tensorboard --logdir=tb_logs
