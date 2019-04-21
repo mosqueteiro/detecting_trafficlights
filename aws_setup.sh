@@ -25,4 +25,4 @@ docker exec detecting_trafficlights_jupyter_flow_1 jupyter notebook list
 
 # tensorboard setup
 mkdir tb_logs
-docker exec detecting_trafficlights_jupyter_flow_1 tensorboard --logdir=tb_logs
+docker exec -d detecting_trafficlights_jupyter_flow_1 tensorboard --logdir=tb_logs
