@@ -80,19 +80,25 @@ if __name__ == "__main__":
     }
     X, y = load_binary_train(**train_args)
     label = ('not_tl','traffic_light')
-    y_label = y.apply(lambda i: label[1] if i == 1 else label[0])
-    mask_tl = y == 1
-    df = X.join(y_label)
-    # df = X.join(y)
-    undersample = np.random.choice(df[~mask_tl].index, size=5000, replace=False)
-    df_balanced = df.loc[mask_tl].append(df.loc[undersample])
+    not_tl = y == 0
+    is_tl = y ==1
+    df = X
+    df['label'] = y
+    df.loc[not_tl, 'category'] = 'not_tl'
+    df.loc[~not_tl, 'category'] = 'traffic_light'
+    # y_label = y.apply(lambda i: label[1] if i == 1 else label[0])
+    # df = X.join(y_label)
+    
+    undersample = np.random.choice(df[~is_tl].index, size=5000, replace=False)
+    df_balanced = df.loc[is_tl].append(df.loc[undersample])
     ttsplit = {'test_size':val_split, 'random_state':seed}
     df_train, df_test = train_test_split(df_balanced, **ttsplit)
-    # y_test = df_test.category.to_numpy()
-    # imgProc = ImageProcessor(df_test.local_path)
-    # imgProc.resize_imgs(input_shape)
-    # X_test = np.array(imgProc.images.to_list())
-    # y_test = y[df_test.category].to_numpy()
+    
+    y_test = df_test.label.to_numpy()
+    imgProc = ImageProcessor(df_test.local_path)
+    imgProc.resize_imgs(input_shape)
+    X_test = np.array(imgProc.images.to_list())
+    
 
     '''Data Generators'''
     df_datagen = ImageDataGenerator(shear_range=0.2,
@@ -115,11 +121,11 @@ if __name__ == "__main__":
                         **gen_ops
                         )
     # gen_ops.update({'class_mode': None})
-    test_generator = test_datagen.flow_from_dataframe(
-                        df_test,
-                        # subset='validation',
-                        **gen_ops
-                        )
+    # test_generator = test_datagen.flow_from_dataframe(
+    #                     df_test,
+    #                     # subset='validation',
+    #                     **gen_ops
+    #                     )
 
     '''Model creation and training'''
     # Hyperparameters for model
@@ -129,9 +135,9 @@ if __name__ == "__main__":
     model = like_AlexNet(input_shape, **hyper)
 
     # add callbacks
-    tb_log = '../tb_logs/binary_lAN_{}_lr{}_{}'.format(color,
+    tb_log = '../tb_logs/binary_lAN_{}_lr{:1.0e}_{}'.format(color,
                                                        hyper['lr'],
-                                                       time())
+                                                       int(time()))
     tensorBoard = TensorBoard(log_dir=tb_log,
                               histogram_freq=1,
                               batch_size=batch_size,
@@ -146,11 +152,11 @@ if __name__ == "__main__":
     # training
     steps = ceil(len(df_balanced)*(1-val_split) / batch_size)
     val_steps = ceil(len(df_balanced)*val_split / batch_size)
-    history = traingen_model(model, train_generator, test_generator,
+    history = traingen_model(model, train_generator, (X_test, y_test),
                 steps,
-                validation_steps=val_steps,
+                # validation_steps=val_steps,
                 epochs=epochs, initial_epoch=initial_epoch,
-                # callbacks=[tensorBoard]
+                callbacks=[tensorBoard]
                 )
 
     score = model.evaluate_generator(test_generator,
