@@ -61,7 +61,7 @@ if __name__ == "__main__":
     ###################################
 
     '''Training parameters'''
-    batch_size = 100
+    batch_size = 128
     val_split = 0.10
     target_size = (100,100)
     input_shape = (*target_size, 3) # use 1 for gray
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     '''Model creation and training'''
     # Hyperparameters for model
     hyper = {
-        'lr': 0.003,
+        'lr': 0.0003,
     }
     model = like_AlexNet(input_shape, **hyper)
 
