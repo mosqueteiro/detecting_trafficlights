@@ -150,7 +150,7 @@ if __name__ == "__main__":
                 steps,
                 validation_steps=val_steps,
                 epochs=epochs, initial_epoch=initial_epoch,
-                callbacks=[tensorBoard]
+                # callbacks=[tensorBoard]
                 )
 
     score = model.evaluate_generator(test_generator,
