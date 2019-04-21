@@ -68,7 +68,6 @@ if __name__ == "__main__":
     epochs = 50
     initial_epoch = 0
     seed = 1337
-    color = 'rgb'
 
 
     '''Loading and Splitting Images'''
@@ -88,17 +87,18 @@ if __name__ == "__main__":
     df_balanced = df.loc[mask_tl].append(df.loc[undersample])
     ttsplit = {'test_size':val_split, 'random_state':seed}
     df_train, df_test = train_test_split(df_balanced, **ttsplit)
-    y_test = df_test.category.to_numpy()
-    imgProc = ImageProcessor(df_test.local_path)
-    imgProc.resize_imgs(input_shape)
-    X_test = np.array(imgProc.images.to_list())
-    y_test = y[df_test.category].to_numpy()
+    # y_test = df_test.category.to_numpy()
+    # imgProc = ImageProcessor(df_test.local_path)
+    # imgProc.resize_imgs(input_shape)
+    # X_test = np.array(imgProc.images.to_list())
+    # y_test = y[df_test.category].to_numpy()
 
     '''Data Generators'''
     df_datagen = ImageDataGenerator(shear_range=0.2,
                                    zoom_range=0.2,
                                    horizontal_flip=True,
                                    validation_split=0.0)
+    test_datagen = ImageDataGenerator()
     gen_ops = {
         'x_col': 'local_path',
         'y_col': 'category',
@@ -113,16 +113,17 @@ if __name__ == "__main__":
                         # subset='training',
                         **gen_ops
                         )
-    # test_generator = df_datagen.flow_from_dataframe(
-    #                     df_test,
-    #                     # subset='validation',
-    #                     **gen_ops
-    #                     )
+    # gen_ops.update({'class_mode': None})
+    test_generator = test_datagen.flow_from_dataframe(
+                        df_test,
+                        # subset='validation',
+                        **gen_ops
+                        )
 
     '''Model creation and training'''
     # Hyperparameters for model
     hyper = {
-        'lr': 0.03,
+        'lr': 0.003,
     }
     model = like_AlexNet(input_shape, **hyper)
 
@@ -144,7 +145,9 @@ if __name__ == "__main__":
     # training
     steps = ceil(len(df_balanced)*(1-val_split) / batch_size)
     val_steps = ceil(len(df_balanced)*val_split / batch_size)
-    history = traingen_model(model, train_generator, (X_test, y_test), steps,
+    history = traingen_model(model, train_generator, test_generator,
+                steps,
+                validation_steps=val_steps,
                 epochs=epochs, initial_epoch=initial_epoch,
                 callbacks=[tensorBoard]
                 )
