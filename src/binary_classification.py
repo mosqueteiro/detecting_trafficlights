@@ -68,6 +68,7 @@ if __name__ == "__main__":
     epochs = 50
     initial_epoch = 0
     seed = 1337
+    color = 'rgb'
 
 
     '''Loading and Splitting Images'''
