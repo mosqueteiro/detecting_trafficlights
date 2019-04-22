@@ -269,7 +269,7 @@ pg2.extensions.register_type(t_array)
 ###################################################
 
 if __name__ == "__main__":
-    coco_dir = '../data/'
+    coco_dir = '../data/coco/'
     dataset = 'train2017'
     user = 'postgres'
     host = 'pg_serv'
