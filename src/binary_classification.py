@@ -130,15 +130,16 @@ if __name__ == "__main__":
     '''Model creation and training'''
     # Hyperparameters for model
     hyper = {
-        'lr': 0.0003,
+        'lr': 0.0001,
         'dropout_rate': 0.75,
-        'activation': 'relu'
+        'activation': 'relu',
+        # 'conv_act': 'tanh'
     }
     model = like_AlexNet(input_shape, **hyper)
 
     # add callbacks
-    tb_log = '../tb_logs/binary_lAN_{}_lr{:1.0e}_dr{:1.0f}_{}'.format(
-        color, hyper['lr'], hyper['dropout_rate']*100, int(time()))
+    tb_log = '../tb_logs/binary_lAN_{}_lr{:1.0e}_dr{:1.0f}_act-{}_{}'.format(
+        color, hyper['lr'], hyper['dropout_rate']*100, hyper['activation'], int(time()))
     tensorBoard = TensorBoard(log_dir=tb_log,
                               histogram_freq=1,
                               batch_size=batch_size,
