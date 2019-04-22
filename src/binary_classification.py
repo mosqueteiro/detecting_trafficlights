@@ -79,15 +79,12 @@ if __name__ == "__main__":
         'data_dir': '../data/coco/'
     }
     X, y = load_binary_train(**train_args)
-    label = ('not_tl','traffic_light')
-    not_tl = y == 0
+    label = ('not_tl','is_tl')
     is_tl = y ==1
     df = X
     df['label'] = y
-    df.loc[not_tl, 'category'] = 'not_tl'
-    df.loc[~not_tl, 'category'] = 'traffic_light'
-    # y_label = y.apply(lambda i: label[1] if i == 1 else label[0])
-    # df = X.join(y_label)
+    df.loc[~is_tl, 'category'] = label[0]
+    df.loc[is_tl, 'category'] = label[1]
 
     undersample = np.random.choice(df[~is_tl].index, size=5000, replace=False)
     df_balanced = df.loc[is_tl].append(df.loc[undersample])
@@ -120,12 +117,6 @@ if __name__ == "__main__":
                         # subset='training',
                         **gen_ops
                         )
-    # gen_ops.update({'class_mode': None})
-    # test_generator = test_datagen.flow_from_dataframe(
-    #                     df_test,
-    #                     # subset='validation',
-    #                     **gen_ops
-    #                     )
 
     '''Model creation and training'''
     # Hyperparameters for model
@@ -160,7 +151,4 @@ if __name__ == "__main__":
                 callbacks=[tensorBoard]
                 )
 
-    # score = model.evaluate_generator(test_generator,
-    #                                 len(test_generator),
-    #                                 verbose=0)
     print('Test score: {:.3f}\tTest accuracy: {:.3f}'.format(*score))
