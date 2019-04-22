@@ -277,7 +277,7 @@ if __name__ == "__main__":
     with BuildDatabase(
         dataset='val2017', user=user, host=host, data_dir=coco_dir
     ) as buildDB:
-        buildDB.build_sql(buildDB.data_dir)
+        buildDB.build_sql()
 
 #     query = '''
 # SELECT id as image_id, file_name, coco_url, local_path
