@@ -1,5 +1,8 @@
 #!/bin/bash
 
+PROJECT=`basename "$PWD"`
+PROJECT="$(echo `basename $PWD` | awk '{print tolower($0)}')"
+
 # make directory to mount EBS datasets to
 mkdir -p data/coco/train2017
 mkdir -p data/coco/val2017
@@ -17,12 +20,16 @@ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 # starting up docker services and installing requirements
 bash start_services.sh
-docker exec detecting_trafficlights_jupyter_flow_1 bash -c \
+docker exec ${PROJECT}_jupyter_flow_1 bash -c \
 "apt update && apt install -y libpq-dev"
-docker exec detecting_trafficlights_jupyter_flow_1 \
+docker exec ${PROJECT}_jupyter_flow_1 \
 pip install -r docker/jupyter/requirements.txt
-docker exec detecting_trafficlights_jupyter_flow_1 jupyter notebook list
+
+docker-compose stop
+docker-compose start
+
+docker exec ${PROJECT}_jupyter_flow_1 jupyter notebook list
 
 # tensorboard setup
 mkdir tb_logs
-docker exec -d detecting_trafficlights_jupyter_flow_1 tensorboard --logdir=tb_logs
+docker exec -d ${PROJECT}_jupyter_flow_1 tensorboard --logdir=tb_logs

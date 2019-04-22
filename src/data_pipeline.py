@@ -263,9 +263,9 @@ def _typecast_array(value, cur):
     bdata.seek(0)
     return np.loadtxt(bdata)
 
-    pg2.extensions.register_adapter(np.ndarray, _adapt_array)
-    t_array = pg2.extensions.new_type(pg2.BINARY.values, 'numpy', _typecast_array)
-    pg2.extensions.register_type(t_array)
+pg2.extensions.register_adapter(np.ndarray, _adapt_array)
+t_array = pg2.extensions.new_type(pg2.BINARY.values, 'numpy', _typecast_array)
+pg2.extensions.register_type(t_array)
 ###################################################
 
 if __name__ == "__main__":
