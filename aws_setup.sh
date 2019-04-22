@@ -27,6 +27,8 @@ pip install -r docker/jupyter/requirements.txt
 
 docker-compose stop
 docker-compose start
+docker exec ${PROJECT})_jupyter_flow_1 -c \
+"cd src && python data_pipeline.py"
 
 docker exec ${PROJECT}_jupyter_flow_1 jupyter notebook list
 
