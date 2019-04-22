@@ -83,7 +83,7 @@ class BuildDatabase(DataPipeline):
         print('Building Database...')
 
         # print('Setting up SQL tables')
-        # self.create_tables('coco_dataset.sql')
+        self.create_tables('coco_dataset.sql')
 
         self.load_json(None)
 
