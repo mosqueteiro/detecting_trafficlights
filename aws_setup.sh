@@ -27,11 +27,13 @@ pip install -r docker/jupyter/requirements.txt
 
 docker-compose stop
 docker-compose start
-docker exec ${PROJECT})_jupyter_flow_1 -c \
+docker exec ${PROJECT}_jupyter_flow_1 bash -c \
 "cd src && python data_pipeline.py"
 
 docker exec ${PROJECT}_jupyter_flow_1 jupyter notebook list
 
 # tensorboard setup
-mkdir tb_logs
+if ! [ -d tb_logs ]; then
+  mkdir tb_logs
+fi
 docker exec -d ${PROJECT}_jupyter_flow_1 tensorboard --logdir=tb_logs
