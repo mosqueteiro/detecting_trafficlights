@@ -14,13 +14,19 @@
 Training models to detect traffic lights with grayscale images
 
 ## Introduction
-As autonomous vehicle technology continues to drive ahead greater computing requirements are levied. Finding ways to reduce needed compute power while maintaining high accuracy is important to making autonomous vehicles a reality. Color images and video frames are generally represented by height, width, and (3) color channels. If the image is reduced to grayscale the color channels are reduced to one potentially reducing the compute power needed for a model. This could allow smaller models to be used as an ensemble or allow a bigger model to fit into a smaller space.
+As autonomous vehicle technology continues to drive ahead greater computing requirements are levied. Finding ways to reduce needed compute power while maintaining high accuracy is important to making autonomous vehicles a reality. Color images and video frames are generally represented by height, width, and (3) color channels. If the image is reduced to grayscale the color channels are reduced to one potentially reducing the compute power needed for a model. This could allow smaller models to be used as an ensemble or allow a bigger model to fit into a smaller space.  
+
+[Back to Top](#Table-of-Contents)
 
 ## Goal of project
-The goal of this project is to train models on small (100x100), grayscale images of traffic lights with accuracy above 97% and compare them to models trained on color images based on model size, compute speed, accuracy, and AUC.
+The goal of this project is to train models on small (100x100), grayscale images of traffic lights with accuracy above 97% and compare them to models trained on color images based on model size, compute speed, accuracy, and AUC.  
+
+[Back to Top](#Table-of-Contents)
 
 ## Description of data
 Images are from the Common Objects in Context (COCO) dataset. COCO is a large-scale object detection, segmentation, and captioning dataset. COCO has 330K images (>200K labeled), 1.5 million object instances, and 80 object categories. They host annual image detection competitions and so datasets are categorized by the year of competition. Further separation is added between train and validation sets. The subset of images used here are filtered on traffic light images and non-traffic light, street-context from the 2017 dataset. Each dataset comes with a json file with tables for categories, images, and annotations.  
+
+[Back to Top](#Table-of-Contents)
 
 
 ## SQL Database
@@ -74,24 +80,33 @@ class QueryDatabase(DataPipeline):
       ...
     def get_images(self):
       ...
-```
+```  
+
+[Back to Top](#Table-of-Contents)
 
 
 ## Exploratory Data Analysis
 Within this database there are ~27,000 street-context images of which ~4,000 contain traffic lights. The size of the traffic lights in each image vary and some images have multiple traffic lights in them. The street-context subset is filtered on road vehicle and outdoor supercategories. Image sizes range from (52-640) x (59-640).
 
 ![raw_gray](images/raw_gray.png)
-![small_gray](images/small_gray.png)
+![small_gray](images/small_gray.png)  
+
+[Back to Top](#Table-of-Contents)
 
 ## Modeling Methodology
-The current model used is modeled after [AlexNet](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf) an 8-layer convolutional neural network. The first (5) layers are convolutional layers that learn filters to apply to the image to make sense of what is in an image. The last (3) layers are fully-connected layers that take the filtered, simplified images and try to learn what makes up a traffic light. AlexNet was originally run in parallel on two GTX 580 graphics cards with 3GB of memory each.
+The current model used is modeled after [AlexNet](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf) an 8-layer convolutional neural network. The first (5) layers are convolutional layers that learn filters to apply to the image to make sense of what is in an image. The last (3) layers are fully-connected layers that take the filtered, simplified images and try to learn what makes up a traffic light. AlexNet was originally run in parallel on two GTX 580 graphics cards with 3GB of memory each.  
 
+[Back to Top](#Table-of-Contents)
 
 ## Results
-The first model has begun to train. The size had to be reduced to fit on the GPU memory. Cross validation will be used to tune the model hyperparameters.
+The first model has begun to train. The size had to be reduced to fit on the GPU memory. Cross validation will be used to tune the model hyperparameters.  
+
+[Back to Top](#Table-of-Contents)
 
 ## Future Work  
 * copy and adapt Tensorflow Dockerfile source to use conda and install needed dependencies within image rather than in shell script  
 
 Train, train, trian train...
-Look at other model architectures, ResNet, Inception models.
+Look at other model architectures, ResNet, Inception models.  
+
+[Back to Top](#Table-of-Contents)
