@@ -88,17 +88,17 @@ if __name__ == "__main__":
     df.loc[~not_tl, 'category'] = 'traffic_light'
     # y_label = y.apply(lambda i: label[1] if i == 1 else label[0])
     # df = X.join(y_label)
-    
+
     undersample = np.random.choice(df[~is_tl].index, size=5000, replace=False)
     df_balanced = df.loc[is_tl].append(df.loc[undersample])
     ttsplit = {'test_size':val_split, 'random_state':seed}
     df_train, df_test = train_test_split(df_balanced, **ttsplit)
-    
+
     y_test = df_test.label.to_numpy()
     imgProc = ImageProcessor(df_test.local_path)
     imgProc.resize_imgs(input_shape)
     X_test = np.array(imgProc.images.to_list())
-    
+
 
     '''Data Generators'''
     df_datagen = ImageDataGenerator(shear_range=0.2,
@@ -130,16 +130,15 @@ if __name__ == "__main__":
     '''Model creation and training'''
     # Hyperparameters for model
     hyper = {
-        'lr': 0.0001,
+        'lr': 0.0003,
         'dropout_rate': 0.75,
-        'activation': 'relu',
-        # 'conv_act': 'tanh'
+        'activation': 'relu'
     }
     model = like_AlexNet(input_shape, **hyper)
 
     # add callbacks
-    tb_log = '../tb_logs/binary_lAN_{}_lr{:1.0e}_dr{:1.0f}_act-{}_{}'.format(
-        color, hyper['lr'], hyper['dropout_rate']*100, hyper['activation'], int(time()))
+    tb_log = '../tb_logs/binary_lAN_{}_lr{:1.0e}_dr{:1.0f}_{}'.format(
+        color, hyper['lr'], hyper['dropout_rate']*100, int(time()))
     tensorBoard = TensorBoard(log_dir=tb_log,
                               histogram_freq=1,
                               batch_size=batch_size,
@@ -161,7 +160,7 @@ if __name__ == "__main__":
                 callbacks=[tensorBoard]
                 )
 
-    score = model.evaluate_generator(test_generator,
-                                    len(test_generator),
-                                    verbose=0)
+    # score = model.evaluate_generator(test_generator,
+    #                                 len(test_generator),
+    #                                 verbose=0)
     print('Test score: {:.3f}\tTest accuracy: {:.3f}'.format(*score))
