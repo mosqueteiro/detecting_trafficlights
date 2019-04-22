@@ -14,7 +14,7 @@ from sklearn.model_selection import train_test_split
 
 from trafficlight_data import load_binary_train
 from image_processing import ImageProcessor
-from models import like_AlexNet
+from models import like_AlexNet, AlexNet_model
 
 
 
@@ -102,7 +102,6 @@ if __name__ == "__main__":
                                    zoom_range=0.2,
                                    horizontal_flip=True,
                                    validation_split=0.0)
-    test_datagen = ImageDataGenerator()
     gen_ops = {
         'x_col': 'local_path',
         'y_col': 'category',
