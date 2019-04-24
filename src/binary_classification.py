@@ -61,7 +61,7 @@ if __name__ == "__main__":
     ###################################
 
     '''Training parameters'''
-    batch_size = 128
+    batch_size = 64
     val_split = 0.10
     target_size = (100,100)
     input_shape = (*target_size, 3) # use 1 for gray
