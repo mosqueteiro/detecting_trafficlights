@@ -79,6 +79,9 @@ ubuntu@ip-xxx-xx-xx-xx:~/data$ rm annotations_trainval2017.zip
 ## Setting up an Instance template
 > **UNDER CONSTRUCTION** This is where I will talk about how to setup instance templates
 
+[Back to top](#overview)
+
+
 ## Starting the Data Science environment  
 The first thing to do in an aws instance is to clone the repo:  
 ```bash
