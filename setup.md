@@ -1,6 +1,43 @@
 
 
-## Initial Setup
+## Initial Setup: Getting the data ready  
+Initial setup of the data science environment should take into consideration the data that will be used. In this project I am using the COCO 2017 dataset. This includes training and validation data and annotations which take up 19 Gb and 1 Gb, respectively. I found it helpful to give each dataset its own storage volume and snapshot to be attached to new machine instances that are built.  
+
+![aws_data_setup](images/aws_data_setup.gif)
+
+On AWS, I instantiated a t2 machine with Amazon Linux on it and two additiional storage volumes with enough space to fit each dataset. The steps to set this up are as follows:  
+1. Initialize EC2 instance with attached storage volumes
+2. `ssh` into the instance
+3. Mount the drives and create a file structure on them, The [AWS docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-using-volumes.html) are helpful for how to get these mounted with file systems.
+4. Get ownership of this file system so we can read and write to it
+   ```bash
+   $ sudo chown storage/volume/path
+   ```
+4. Download the data and annotations  
+   ```bash
+   $ cd storage/volume/path
+   $ wget http://images.cocodataset.org/zips/train2017.zip
+   $ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
+   ```
+5. Unzip the data and move it to the root of the storage volume so that when we mount it later we don't have extra directories to sort through
+   ```bash
+   $ unzip train2017.zip
+   $ find train2017/ -name *.jpg exec mv {} ./ ;\
+   $ rm -r train2017
+
+   $ mkdir annotations
+   $ unzip annotations_trainval2017.zip -d annotations/
+   ```
+7. Terminate the instance (storage volumes will persist if `Delete on Termination` isn't checked) and save the data as a snapshot.
+
+   ![aws_snapshot](images/aws_snapshot.gif)
+
+8. Terminate the data volumes.
+
+
+
+
+## Starting the Data Science environment  
 The first thing to do in an aws instance is to clone the repo:  
 ```bash
 git clone https://github.com/mosqueteiro/detecting_trafficlights.git && \
