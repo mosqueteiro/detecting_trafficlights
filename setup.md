@@ -3,8 +3,8 @@
 ## Initial Setup
 The first thing to do in an aws instance is to clone the repo:  
 ```bash
-$ git clone https://github.com/mosqueteiro/detecting_trafficlights.git && \
-cd detecting_trafficlights
+$ git clone https://github.com/mosqueteiro/scalable_DS_envs.git && \
+cd scalable_DS_envs
 ```
 
 Switch to the `aws-gpu` branch then run the aws_setup.sh script:
@@ -13,7 +13,9 @@ $ git checkout aws-gpu
 $ bash aws_setup.sh
 ```
 
-## PostgreSQL
+## PostgreSQL setup  
+We need to load our SQL database with all the information from the annotations.  
+
 
 
 ## EBS storage volume setup  

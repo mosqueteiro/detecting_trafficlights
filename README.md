@@ -1,4 +1,4 @@
-# Detecting Trafficlights
+# Building Scalable Data Science Environments  
 
 ## Table of contents
 1. [Introduction](#introduction)
