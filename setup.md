@@ -92,7 +92,7 @@ Instance templates provide a way to quickly load an instance with saved settings
   **Instance Type:** This is the machine itself. The `p2.xlarge` is a good place to start for GPU instances  
   **Key pair name:** This is the security key required to `ssh` into the instance  
   **Security Groups:** Ports and IP Addresses allowed (make this ahead of time).  
-  ![sec_grp](images/sec_grp.png?)  
+  ![sec_grp](images/aws_sec_grp.png?)  
 
 4. Add the _Storage (Volumes)_ with appropriate snapshots attached to them  
   ![volume_add](images/aws_temp_vol.png?)  
