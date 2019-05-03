@@ -108,8 +108,8 @@ Instance templates provide a way to quickly load an instance with saved settings
 ## Starting the Data Science environment  
 The first thing to do in an aws instance is to clone the repo:  
 ```bash
-git clone https://github.com/mosqueteiro/detecting_trafficlights.git && \
-cd detecting_trafficlights
+git clone https://github.com/mosqueteiro/scalable_DS_envs.git && \
+cd scalable_DS_envs
 ```
 
 Then the aws_setup.sh script:
@@ -159,6 +159,23 @@ $ docker exec -it pgserv bash
 
 ## Tensorflow with Jupyter  
 
+The tensorflow container can run python programs through `bash` or `ipython` as well as running a Jupyter Notebook server. Currently, the _Tensorflow_ container runs as root which can affect file permissions for new files that are created. Future updates should include changing the `USER` of the container to avoid this.  
+To start a `bash` or `ipython` session,  
+```bash
+$ docker exec -it scalable_ds_envs_jupyter_flow_1 bash
+```  
+or  
+```bash
+$ docker exec -it scalable_ds_envs_jupyter_flow_1 ipython
+```  
+
+The container is setup to automatically run a Jupyter Notebook server. The server can be accessed from any browser with the EC2 instance IP address at the normal port `:8888` but the specific token for that server will be needed to access it. It should print out when running the setup script. To print out the port and token,  
+```bash
+$ docker exec -it scalable_ds_envs_jupyter_flow_1 jupyter notebook list
+...
+server at:
+http://localhost:8888/token=xxxxxxxxxxxxxxxxxxx
+```
 
 
 [Back to top](#overview)
