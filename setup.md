@@ -3,8 +3,11 @@
 1. [Preparing the data](#preparing-the-data)
    * [Storage Volume Setup](#storage-volume-setup)
 2. [Setting up an Instance template](#Setting-up-an-instance-template)
-2. [Starting the Data Science Environment](#starting-the-data-science-environment)
-3. [PostgreSQL](#postgresql)
+3. [Starting the Data Science Environment](#starting-the-data-science-environment)
+4. [PostgreSQL](#postgresql)
+   * [Accessing the postgres terminal](#accessing-the-postgres-terminal)
+   * [Loading data](#loading-data-into-the-server-from-a-local-file)
+5. [Tensorflow with Jupyter](#tensorflow-with-jupyter)
 
 ## Preparing the data  
 Initial setup of the data science environment should take into consideration the data that will be used. In this project I am using the COCO 2017 dataset. This includes training and validation data and annotations which take up 19 Gb and 1 Gb, respectively. I found it helpful to give each dataset its own storage volume and snapshot to be attached to new machine instances that are built.  
@@ -77,7 +80,27 @@ ubuntu@ip-xxx-xx-xx-xx:~/data$ rm annotations_trainval2017.zip
 
 
 ## Setting up an Instance template
-> **UNDER CONSTRUCTION** This is where I will talk about how to setup instance templates
+
+Instance templates provide a way to quickly load an instance with saved settings such as EBS volumes and snaptshots, security, and labels. This is where we will pick the machine we want to do our training on.
+
+1. Navigate to the `Launch Templates` tab on the left toolbar of the _EC2 Dashboard_ and click `Create launch template`  
+
+2. Fill in the _Launch template name_ and _Template version description_.  
+
+3. _Launch Template Contents_  
+  **AMI ID:** search for the desired configuration, for GPU we can use the `Deep Learning Base (Ubuntu) 17.0`  
+  **Instance Type:** This is the machine itself. The `p2.xlarge` is a good place to start for GPU instances  
+  **Key pair name:** This is the security key required to `ssh` into the instance  
+  **Security Groups:** Ports and IP Addresses allowed (make this ahead of time).  
+  ![sec_grp](images/sec_grp.png?)  
+
+4. Add the _Storage (Volumes)_ with appropriate snapshots attached to them  
+  ![volume_add](images/aws_temp_vol.png?)  
+
+5. _Instance tags_ `Key: Name` and `Value: InstanceName`  
+
+6. click `Create launch tmeplate` and the template is ready to go.
+
 
 [Back to top](#overview)
 
@@ -99,28 +122,15 @@ bash aws_setup.sh
 
 
 ## PostgreSQL
-### Starting the postgres server in a container
-
-Let's create & start up a container with the official postgres image. Here I've named the container `pgserv`, but you can call it anything.
-```
-$ docker run --name pgserv -d -p 5435:5432 -v "$PWD":/home/data postgres
-```
-- the `-d` flag means "run this container in the background"
-- `-p 5435:5432` means "connect port 5435 from this computer (localhost) to the container's port 5432". This will allow us to connect to the Postgres server (which is inside the container) from services running outside of the container (such as python, as we'll see later).
-
-In the future, you can start this container by using the `docker start` command
-```bash
-$ docker start pgserv
-```
-
-### Accessing the postgres terminal, [psql](http://postgresguide.com/utilities/psql.html)
+### Accessing the postgres terminal  
+from [psql docker guide](http://postgresguide.com/utilities/psql.html)
 
 `psql` is the command to open up a postgres terminal, and we need to run this command on inside the container. `docker exec` is the way to execute commands in a running container. See the documentation [here](https://docs.docker.com/engine/reference/commandline/exec/)
 ```
 $ docker exec -it pgserv psql -U postgres
-=# CREATE DATABASE yeah;
-=# CREATE TABLE whatever ... ;
-=# SELECT * FROM whatever
+=# CREATE DATABASE dbname;
+=# CREATE TABLE table_1 ... ;
+=# SELECT * FROM table_1
 =# \q
 ```
 
@@ -143,5 +153,12 @@ $ docker exec -it pgserv bash
 =# \d
 =# SELECT * FROM critical_table LIMIT 13;
 ```
+
+[Back to top](#overview)
+
+
+## Tensorflow with Jupyter  
+
+
 
 [Back to top](#overview)
