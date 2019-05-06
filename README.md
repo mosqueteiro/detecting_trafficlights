@@ -14,7 +14,9 @@
 Training models to detect traffic lights with grayscale images
 
 ## Introduction
-As autonomous vehicle technology continues to drive ahead greater computing requirements are levied. Finding ways to reduce needed compute power while maintaining high accuracy is important to making autonomous vehicles a reality. Color images and video frames are generally represented by height, width, and (3) color channels. If the image is reduced to grayscale the color channels are reduced to one potentially reducing the compute power needed for a model. This could allow smaller models to be used as an ensemble or allow a bigger model to fit into a smaller space.  
+Through the course of working on data science projects different package requirements are needed for different projects. Having a large catch-all environment may be able to satisfy most requirements but will be bulky and take up unnecessary space. Further, some specialized requirements will not be met by this strategy. Ultimately, with different machines running and testing the project at different times a standard environment will need to be shared between machines.  
+
+A self-contained environment is a good solution to this problem. Requirements can be specified in a file and the environment built out to match between different machines. Another benefit of this strategy allows the project to scale up to bigger, and more powerful machines as needed. Also, additional testing and, later, solution deployment will benefit from a well defined environment keeping an entire team working with the same tools from the beginning.  
 
 [Back to Top](#Table-of-Contents)
 
