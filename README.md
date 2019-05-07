@@ -8,7 +8,7 @@
 5. [Docker Compose](#docker-compose)
 6. [Tensorflow GPU with Jupyter](#tensorflow-gpu-with-jupyter-notebooks)
 7. [PostgreSQL](#postgresql)
-  * [SQL Database](#sql-database)
+  * [Database class](#database-class)
 4. [EDA](#exploratory-data-analysis)
 5. [Modeling Methodology](#modeling-methodology)
 6. [Results](#results)
@@ -84,18 +84,12 @@ Another tool useful with tensorflow is `Tensorboard`. Tensorboard tracks and vis
 
 ## PostgreSQL
 
-[Back to Top](#Table-of-Contents)
+The PostgreSQL container provides a quick implementation of the PostgreSQL database application. The PostgreSQL team provides docker hookpoints to build the database at the time the container is run by copying sql and bash scripts into the `docker-entrypoint-initdb.d` directory which runs any files present at this location. This provides a quick and portable way to use postgres and build out a database on multiple machines.
 
+The COCO dataset uses object localization annotations where an image generally has mulitple annotations that belong to different categories. To find which pictures belong to which categories a SQL database provides a powerful way to query and restructure the data to meet a project's desired needs.
 
-## Docker Compose
-
-
-
-[Back to Top](#Table-of-Contents)
-
-
-## SQL Database
-To manage all the images and annotations a PostgreSQL database is created to hold image metadata and image annotation data. As images are downloaded their local path is recorded into the database for quick access later on. A data pipeline class helps to connect python to the database. The data pipeline is built on top of `psycopg2`.
+### Database class
+ To manage all the images and annotations a PostgreSQL database is created to hold image metadata and image annotation data. As images are downloaded their local path is recorded into the database for quick access later on. A data pipeline class helps to connect python to the database. The data pipeline is built on top of `psycopg2`.
 
 ```python
 class DataPipeline(object):
@@ -150,6 +144,13 @@ class QueryDatabase(DataPipeline):
 [Back to Top](#Table-of-Contents)
 
 
+## Docker Compose
+
+
+
+[Back to Top](#Table-of-Contents)
+
+
 ## Exploratory Data Analysis
 Within this database there are ~27,000 street-context images of which ~4,000 contain traffic lights. The size of the traffic lights in each image vary and some images have multiple traffic lights in them. The street-context subset is filtered on road vehicle and outdoor supercategories. Image sizes range from (52-640) x (59-640).
 
@@ -169,7 +170,8 @@ The first model has begun to train. The size had to be reduced to fit on the GPU
 [Back to Top](#Table-of-Contents)
 
 ## Future Work  
-* copy and adapt Tensorflow Dockerfile source to use conda and install needed dependencies within image rather than in shell script  
+* copy and adapt Tensorflow Dockerfile source to use conda and install needed dependencies within image rather than in shell script
+* PostgreSQL mount reusable database through EBS and snapshot rather than rebuilding for every new instance
 
 Train, train, trian train...
 Look at other model architectures, ResNet, Inception models.  
