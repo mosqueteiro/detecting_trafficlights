@@ -86,7 +86,7 @@ Another tool useful with tensorflow is `Tensorboard`. Tensorboard tracks and vis
 
 The PostgreSQL container provides a quick implementation of the PostgreSQL database application. The PostgreSQL team provides docker hookpoints to build the database at the time the container is run by copying sql and bash scripts into the `docker-entrypoint-initdb.d` directory which runs any files present at this location. This provides a quick and portable way to use postgres and build out a database on multiple machines.
 
-The COCO dataset uses object localization annotations where an image generally has mulitple annotations that belong to different categories. To find which pictures belong to which categories a SQL database provides a powerful way to query and restructure the data to meet a project's desired needs.
+The COCO dataset uses object localization annotations where an image generally has mulitple annotations that belong to different categories. The SQL database provides a powerful way to query and subset the images an annotations as needed.
 
 ### Database class
  To manage all the images and annotations a PostgreSQL database is created to hold image metadata and image annotation data. As images are downloaded their local path is recorded into the database for quick access later on. A data pipeline class helps to connect python to the database. The data pipeline is built on top of `psycopg2`.
@@ -146,7 +146,11 @@ class QueryDatabase(DataPipeline):
 
 ## Docker Compose
 
+The compose tool by Docker allows simple orchestration of multiple docker containers through a single `docker-compose.yml` file. Containers created using Docker Compose are setup on their own docker network simplifying communication between the containers. For instance, the `DataPipeline` class running in the Tensorflow container uses the name of the PostgreSQL container as the host name to connect to it. A single command builds and runs the entire app with all the containers
 
+```bash
+.../scalable_DS_envs$ docker-compose up
+```
 
 [Back to Top](#Table-of-Contents)
 
@@ -171,6 +175,7 @@ The first model has begun to train. The size had to be reduced to fit on the GPU
 
 ## Future Work  
 * copy and adapt Tensorflow Dockerfile source to use conda and install needed dependencies within image rather than in shell script
+* add tensorboard to Tensorflow Dockerfile
 * PostgreSQL mount reusable database through EBS and snapshot rather than rebuilding for every new instance
 
 Train, train, trian train...
