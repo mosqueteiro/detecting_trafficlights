@@ -9,7 +9,7 @@ The `master` branch on this repo provides an exploration of the environments cre
 4. [Docker](#docker)
 6. [Tensorflow GPU with Jupyter](#tensorflow-gpu-with-jupyter-notebooks)
 7. [PostgreSQL](#postgresql)
-  * [Database class](#database-class)
+   * [Database class](#database-class)
 7. [Docker Compose](#docker-compose)
 8. [Amazon Web Services](#amazon-web-services)
 4. [EDA](#exploratory-data-analysis)
