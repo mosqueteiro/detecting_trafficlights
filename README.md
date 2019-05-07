@@ -1,17 +1,20 @@
-# Building Scalable Data Science Environments  
+# Building Deployable Data Science Environments  
 
 ## Table of contents
 1. [Introduction](#introduction)
 2. [Goal of project](#goal-of-project)
 3. [Description of Data](#description-of-data)
-3. [SQL Database](#sql-database)
+4. [Docker](#docker)
+5. [Docker Compose](#docker-compose)
+6. [Tensorflow GPU with Jupyter](#tensorflow-gpu-with-jupyter-notebooks)
+7. [PostgreSQL](#postgresql)
+  * [SQL Database](#sql-database)
 4. [EDA](#exploratory-data-analysis)
 5. [Modeling Methodology](#modeling-methodology)
 6. [Results](#results)
 7. [Future Work](#future-work)
 
 
-Training models to detect traffic lights with grayscale images
 
 ## Introduction
 Through the course of working on data science projects different package requirements are needed for different projects. Having a large catch-all environment may be able to satisfy most requirements but will be bulky and take up unnecessary space. Further, some specialized requirements will not be met by this strategy. Ultimately, with different machines running and testing the project at different times a standard environment will need to be shared between machines.  
@@ -21,12 +24,36 @@ A self-contained environment is a good solution to this problem. Requirements ca
 [Back to Top](#Table-of-Contents)
 
 ## Goal of project
-The goal of this project is to train models on small (100x100), grayscale images of traffic lights with accuracy above 97% and compare them to models trained on color images based on model size, compute speed, accuracy, and AUC.  
+The goal of this project is to develop a data science environment for an image recognition system that can be deployed onto GPU instances on AWS. This allows rapid model prototyping, concurrent model testing, scalability between machines, and future system deployment.  
 
 [Back to Top](#Table-of-Contents)
 
 ## Description of data
 Images are from the Common Objects in Context (COCO) dataset. COCO is a large-scale object detection, segmentation, and captioning dataset. COCO has 330K images (>200K labeled), 1.5 million object instances, and 80 object categories. They host annual image detection competitions and so datasets are categorized by the year of competition. Further separation is added between train and validation sets. The subset of images used here are filtered on traffic light images and non-traffic light, street-context from the 2017 dataset. Each dataset comes with a json file with tables for categories, images, and annotations.  
+
+[Back to Top](#Table-of-Contents)
+
+
+## Docker
+
+Docker is a computer program that runs virtualization directly on top of the operating system. This allows applications to be run with the speed of a native install without the length and difficulties of a manual install. Apps run through docker are called containers. Their build and use is the same between machines allowing cross-platform development and deployment.
+
+In this project containers for Tensorflow and PostgreSQL are used to provide needed tools for an image recognition project. The main prerequisite is having docker installed on the machine. For GPU computing, the Nvidia graphics driver and Nvidia-docker app are, additionally, needed. Everything else is built into the docker containers. 
+
+[Back to Top](#Table-of-Contents)
+
+
+## Docker Compose
+
+[Back to Top](#Table-of-Contents)
+
+
+## Tensorflow-GPU with Jupyter Notebooks
+
+[Back to Top](#Table-of-Contents)
+
+
+## PostgreSQL
 
 [Back to Top](#Table-of-Contents)
 
