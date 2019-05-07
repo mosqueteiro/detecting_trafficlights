@@ -2,6 +2,11 @@
 
 The `master` branch on this repo provides an exploration of the environments created in the project. To deploy one of the environments read this `README.md`, the `setup.md`, and switch to the appropriate branch for the environment you would like to deploy.
 
+Sped up example of environment build (currently ~11 min)  
+![aws_build](images/aws_build_quick.gif)
+
+The presentation for this project can be found [here](https://docs.google.com/presentation/d/1K-L4DFzVJ279eWqHT5_Bs9Cg_Sg4bGChLoj12MAghNc/edit?usp=sharing).
+
 ## Table of contents
 1. [Introduction](#introduction)
 2. [Goal of project](#goal-of-project)
