@@ -1,14 +1,17 @@
 # Building Deployable Data Science Environments  
 
+The `master` branch on this repo provides an exploration of the environments created in the project. To deploy one of the environments read this `README.md`, the `setup.md`, and switch to the appropriate branch for the environment you would like to deploy.
+
 ## Table of contents
 1. [Introduction](#introduction)
 2. [Goal of project](#goal-of-project)
 3. [Description of Data](#description-of-data)
 4. [Docker](#docker)
-5. [Docker Compose](#docker-compose)
 6. [Tensorflow GPU with Jupyter](#tensorflow-gpu-with-jupyter-notebooks)
 7. [PostgreSQL](#postgresql)
   * [Database class](#database-class)
+7. [Docker Compose](#docker-compose)
+8. [Amazon Web Services](#amazon-web-services)
 4. [EDA](#exploratory-data-analysis)
 5. [Modeling Methodology](#modeling-methodology)
 6. [Results](#results)
@@ -76,8 +79,6 @@ container@~$ python path/file.py
 ```
 
 Another tool useful with tensorflow is `Tensorboard`. Tensorboard tracks and visualizes the metrics of a tensorflow model, it's weights and gradients, and a model graph while the model is training. Tensorboard runs a local server that is accessed through a web browser. The model training must use the `Tensorboard` callback to utilize this tool. Again, with the right security parameters, the Tensorboard server can be accessed from any web browser outside of the system. This is useful to quickly check on the progress of a larger model training while being detached from the system. The Tensorboard server is started with `tensorboard --logdir=logs/` passed to the docker container using `docker exec ...`. It is accessed using the machine IP address at port `6006`.
-
-![tb_results](images/tensor_board_results.png)
 
 [Back to Top](#Table-of-Contents)
 
@@ -155,11 +156,25 @@ The compose tool by Docker allows simple orchestration of multiple docker contai
 [Back to Top](#Table-of-Contents)
 
 
-## Exploratory Data Analysis
-Within this database there are ~27,000 street-context images of which ~4,000 contain traffic lights. The size of the traffic lights in each image vary and some images have multiple traffic lights in them. The street-context subset is filtered on road vehicle and outdoor supercategories. Image sizes range from (52-640) x (59-640).
+## Amazon Web Services
 
-![raw_gray](images/raw_gray.png)
-![small_gray](images/small_gray.png)  
+Amazon Web Services (AWS) provide powerful cloud tools for data science projects, especially when the project scope goes beyond what can be accomplished on a local machine. In the context of image recognition systems, GPU machines are needed to train models in a short enough time to be useful. AWS EC2 has a variety of machine instances available including a number of GPU enabled machines. This allows project scaling depending on current needs. For instance, when first setting up the project data, before deploying the environment and during EDA, a less expensive smaller machine instance can be used.
+
+Elastic Block Storage (EBS) provides an ideal way to store data that can be extended to multiple machines with ease. In this project, during the initial setup, EBS volumes are created and loaded with the project data. A snapshot of the volume is then created after which the volume can be terminated. The snapshot can then be loaded into any subsequent (and multiple) EBS volumes and attached to another machine. Storing the data as a snapshot minimizes storage cost because snapshots are charged at the AWS S3 rate rather than the much higher EBS volume storage rate.
+
+A guide to setting these tools up is provided in the [setup](setup.md) file.
+
+[Back to Top](#Table-of-Contents)
+
+
+## Exploratory Data Analysis
+Within this database there are ~27,000 street-context images of which ~4,000 contain traffic lights. The size of the traffic lights in each image vary and some images have multiple traffic lights in them. The street-context subset is filtered on road vehicle and outdoor supercategories. Image sizes range from (52-640) x (59-640). The images in the COCO dataset can even be challenging for humans to identify.
+
+This image containes four traffic lights, can you spot them all?  
+![tl_1](images/trafficlight_1.png)
+
+This image, while part of a roadway context, does not contain any traffic lights.  
+![no_tl_1](images/no_trafficlight_1.png)  
 
 [Back to Top](#Table-of-Contents)
 
@@ -169,7 +184,9 @@ The current model used is modeled after [AlexNet](https://papers.nips.cc/paper/4
 [Back to Top](#Table-of-Contents)
 
 ## Results
-The first model has begun to train. The size had to be reduced to fit on the GPU memory. Cross validation will be used to tune the model hyperparameters.  
+The first models do not improve much from the 56% on the validation data. The model is overfitting which could be addressed with more Dropout and more data, however, the validation accuracy will not likely improve much with this strategy. Due to the complexity of the image data it is likely that better results would be obtained training the model first on an easier dataset before training using the COCO dataset. A more complex model may also be helpful for this dataset.
+
+![tb_results](images/tensor_board_results.png)
 
 [Back to Top](#Table-of-Contents)
 
@@ -177,8 +194,8 @@ The first model has begun to train. The size had to be reduced to fit on the GPU
 * copy and adapt Tensorflow Dockerfile source to use conda and install needed dependencies within image rather than in shell script
 * add tensorboard to Tensorflow Dockerfile
 * PostgreSQL mount reusable database through EBS and snapshot rather than rebuilding for every new instance
+* train on [ImageNet](http://www.image-net.org/) or [Google Open Images](https://storage.googleapis.com/openimages/web/index.html) first.
+* experiment with ResNets, Inception models, and newer RCNN models
 
-Train, train, trian train...
-Look at other model architectures, ResNet, Inception models.  
 
 [Back to Top](#Table-of-Contents)
