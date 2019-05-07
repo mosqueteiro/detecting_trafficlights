@@ -38,7 +38,23 @@ Images are from the Common Objects in Context (COCO) dataset. COCO is a large-sc
 
 Docker is a computer program that runs virtualization directly on top of the operating system. This allows applications to be run with the speed of a native install without the length and difficulties of a manual install. Apps run through docker are called containers. Their build and use is the same between machines allowing cross-platform development and deployment.
 
-In this project containers for Tensorflow and PostgreSQL are used to provide needed tools for an image recognition project. The main prerequisite is having docker installed on the machine. For GPU computing, the Nvidia graphics driver and Nvidia-docker app are, additionally, needed. Everything else is built into the docker containers. 
+In this project containers for Tensorflow and PostgreSQL are used to provide needed tools for an image recognition project. The main prerequisite is having docker installed on the machine. For GPU computing, the Nvidia graphics driver and Nvidia-docker app are, additionally, needed. Everything else is built into the docker containers.
+
+Many base docker images for tools like Tensorflow and PostgreSQL are provided by the teams that build the tools. These can be customized with a _Dockerfile_ that begins with the base image and adds layers of functionality or project requirements on top of it. The _Dockerfile_ used for Tensorflow in this project adds all the packages listed in the _requirements.txt_ file and any dependencies those packages may need.
+
+```docker
+FROM tensorflow/tensorflow:latest-py3-jupyter
+
+
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt && rm requirements.txt
+
+RUN useradd -ms /bin/ jovyan
+
+USER jovyan
+
+CMD ["bash", "-c", "source /etc/bash.bashrc && jupyter notebook --notebook-dir=/tf --ip 0.0.0.0 --no-browser"]
+```
 
 [Back to Top](#Table-of-Contents)
 
